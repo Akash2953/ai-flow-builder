@@ -1,0 +1,1138 @@
+<title>Stickman AI Journey</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+
+<style>
+:root {
+  --bg-primary: #0b0f17;
+  --bg-surface: #131b2a;
+  --bg-card: rgba(25, 34, 51, 0.7);
+  --border: rgba(255, 255, 255, 0.1);
+  --border-active: rgba(99, 102, 241, 0.5);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.35);
+  --accent-cyan: #06b6d4;
+  --accent-emerald: #10b981;
+  --accent-rose: #f43f5e;
+  --accent-amber: #f59e0b;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg-primary: #f1f5f9;
+    --bg-surface: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --border: rgba(15, 23, 42, 0.12);
+    --border-active: rgba(79, 70, 229, 0.5);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent: #4f46e5;
+    --accent-glow: rgba(79, 70, 229, 0.25);
+    --accent-cyan: #0891b2;
+    --accent-emerald: #059669;
+    --accent-rose: #e11d48;
+    --accent-amber: #d97706;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg-primary: #0b0f17;
+  --bg-surface: #131b2a;
+  --bg-card: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.1);
+  --border-active: rgba(99, 102, 241, 0.5);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.35);
+  --accent-cyan: #06b6d4;
+  --accent-emerald: #10b981;
+  --accent-rose: #f43f5e;
+  --accent-amber: #f59e0b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px env(safe-area-inset-bottom, 24px);
+}
+
+.player-wrapper {
+  width: 100%;
+  max-width: 1040px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.title-group h1 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--accent);
+  border: 1px solid var(--border-active);
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #05070d;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border);
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.controls-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  backdrop-filter: blur(12px);
+}
+
+.timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scrubber-container {
+  flex: 1;
+  position: relative;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.scrubber-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent), var(--accent-emerald));
+  border-radius: 999px;
+  width: 0%;
+  position: relative;
+}
+
+.scrubber-thumb {
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.time-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  min-width: 110px;
+  text-align: right;
+}
+
+.actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-active);
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+button.primary:hover {
+  filter: brightness(1.1);
+}
+
+.scene-pills {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.scene-pill {
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.scene-pill.active {
+  color: var(--text-primary);
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--accent);
+}
+
+.export-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.export-banner strong {
+  color: var(--text-primary);
+}
+
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+}
+</style>
+
+<div class="player-wrapper">
+  <div class="header">
+    <div class="title-group">
+      <h1>⚡ Stickman: Why AI Matters (Speaking Edition)</h1>
+      <span class="badge">20.0s Animated Story</span>
+    </div>
+    <div class="status-tag">
+      <div class="status-dot" id="rec-dot"></div>
+      <span id="rec-status">Speech & Dialogue Engine Active</span>
+    </div>
+  </div>
+
+  <div class="video-container">
+    <canvas id="videoCanvas" width="1280" height="720"></canvas>
+  </div>
+
+  <div class="controls-card">
+    <div class="timeline-row">
+      <div class="scrubber-container" id="scrubberTrack">
+        <div class="scrubber-fill" id="scrubberFill">
+          <div class="scrubber-thumb"></div>
+        </div>
+      </div>
+      <div class="time-display" id="timeLabel">00:00.0 / 00:20.0</div>
+    </div>
+
+    <div class="actions-row">
+      <div class="btn-group">
+        <button id="playBtn" class="primary">
+          <span id="playIcon">▶</span> <span id="playText">Play</span>
+        </button>
+        <button id="restartBtn">↺ Replay</button>
+        <button id="audioToggle">🔊 Voice & FX: ON</button>
+      </div>
+
+      <div class="scene-pills">
+        <div class="scene-pill" data-time="0">1. Exhausted (0s)</div>
+        <div class="scene-pill" data-time="5">2. AI Dialog (5s)</div>
+        <div class="scene-pill" data-time="10">3. 10x Flying (10s)</div>
+        <div class="scene-pill" data-time="15.5">4. Climax Speech (15.5s)</div>
+      </div>
+
+      <div class="btn-group">
+        <button id="exportBtn" class="primary" style="background: linear-gradient(135deg, #06b6d4, #6366f1);">
+          ⬇ Export 20s Video (WebM)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="export-banner">
+    <div>
+      <strong>💬 Full Animated Dialogue:</strong> Stickman speaks with animated mouth articulation, speech bubbles, and voice synthesis.
+    </div>
+    <div id="exportStateText">Click Export to generate downloadable 20.0s 60fps video file.</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('videoCanvas');
+  const ctx = canvas.getContext('2d');
+  const DURATION = 20.0;
+  let currentTime = 0.0;
+  let isPlaying = false;
+  let lastTimestamp = null;
+  let audioEnabled = true;
+
+  const playBtn = document.getElementById('playBtn');
+  const playIcon = document.getElementById('playIcon');
+  const playText = document.getElementById('playText');
+  const restartBtn = document.getElementById('restartBtn');
+  const audioToggle = document.getElementById('audioToggle');
+  const scrubberTrack = document.getElementById('scrubberTrack');
+  const scrubberFill = document.getElementById('scrubberFill');
+  const timeLabel = document.getElementById('timeLabel');
+  const scenePills = document.querySelectorAll('.scene-pill');
+  const exportBtn = document.getElementById('exportBtn');
+  const exportStateText = document.getElementById('exportStateText');
+
+  let audioCtx = null;
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  function playTone(freq, duration, type = 'sine', gain = 0.15) {
+    if (!audioEnabled || !audioCtx) return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      g.gain.setValueAtTime(gain, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+      osc.connect(g);
+      g.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {}
+  }
+
+  let voiceTickCount = 0;
+  function playVoiceBlip(character = 'stickman') {
+    if (!audioEnabled || !audioCtx) return;
+    voiceTickCount++;
+    if (voiceTickCount % 4 !== 0) return;
+
+    if (character === 'stickman') {
+      const freq = 220 + Math.random() * 80;
+      playTone(freq, 0.06, 'triangle', 0.07);
+    } else if (character === 'ai') {
+      const freq = 560 + Math.random() * 240;
+      playTone(freq, 0.05, 'sine', 0.09);
+    }
+  }
+
+  let soundEventsTriggered = {};
+
+  function triggerSceneAudio(t) {
+    if (!audioEnabled) return;
+    initAudio();
+
+    if (t < 5.0) {
+      const beat = Math.floor(t * 2);
+      if (!soundEventsTriggered['s1_' + beat]) {
+        soundEventsTriggered['s1_' + beat] = true;
+        playTone(160 + (beat % 2) * 20, 0.1, 'triangle', 0.06);
+      }
+    }
+
+    if (t >= 5.0 && t < 5.3 && !soundEventsTriggered['s2_spark']) {
+      soundEventsTriggered['s2_spark'] = true;
+      playTone(523.25, 0.4, 'sine', 0.2);
+      setTimeout(() => playTone(659.25, 0.5, 'sine', 0.2), 150);
+      setTimeout(() => playTone(783.99, 0.6, 'sine', 0.25), 300);
+      setTimeout(() => playTone(1046.50, 0.8, 'sine', 0.3), 450);
+    }
+
+    if (t >= 10.0 && t < 15.5) {
+      const beat = Math.floor((t - 10.0) * 3);
+      if (!soundEventsTriggered['s3_' + beat]) {
+        soundEventsTriggered['s3_' + beat] = true;
+        playTone(380 + (beat % 4) * 90, 0.12, 'sawtooth', 0.05);
+      }
+    }
+
+    if (t >= 15.5 && !soundEventsTriggered['s4_climax']) {
+      soundEventsTriggered['s4_climax'] = true;
+      playTone(392.00, 1.2, 'sine', 0.18);
+      playTone(587.33, 1.2, 'sine', 0.18);
+      playTone(880.00, 1.6, 'sine', 0.25);
+    }
+  }
+
+  const particles = [];
+  for (let i = 0; i < 45; i++) {
+    particles.push({
+      x: Math.random() * 1280,
+      y: Math.random() * 720,
+      vx: (Math.random() - 0.5) * 2,
+      vy: (Math.random() - 0.5) * 2,
+      size: Math.random() * 3 + 1,
+      alpha: Math.random()
+    });
+  }
+
+  function drawBackground(t) {
+    const grad = ctx.createLinearGradient(0, 0, 1280, 720);
+    if (t < 5.0) {
+      grad.addColorStop(0, '#0a0d14');
+      grad.addColorStop(1, '#161924');
+    } else if (t < 10.0) {
+      grad.addColorStop(0, '#080d1a');
+      grad.addColorStop(1, '#111e38');
+    } else if (t < 15.5) {
+      grad.addColorStop(0, '#0c1527');
+      grad.addColorStop(0.5, '#132142');
+      grad.addColorStop(1, '#0e2b45');
+    } else {
+      grad.addColorStop(0, '#0a1128');
+      grad.addColorStop(0.5, '#1c194a');
+      grad.addColorStop(1, '#091e3a');
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1280, 720);
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 1;
+    const floorY = 560;
+    for (let x = 0; x <= 1280; x += 60) {
+      ctx.beginPath();
+      ctx.moveTo(x, floorY);
+      ctx.lineTo(x + (x - 640) * 0.5, 720);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.moveTo(0, floorY);
+    ctx.lineTo(1280, floorY);
+    ctx.stroke();
+
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0) p.x = 1280;
+      if (p.x > 1280) p.x = 0;
+      if (p.y < 0) p.y = 720;
+      if (p.y > 720) p.y = 0;
+      ctx.fillStyle = t > 5.0 ? `rgba(6, 182, 212, ${p.alpha * 0.4})` : `rgba(255, 255, 255, ${p.alpha * 0.15})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function drawSpeechBubble(x, y, text, speaker = 'stickman', tailDirection = 'bottom-left', isSpeaking = true) {
+    ctx.save();
+    ctx.font = '700 16px "Plus Jakarta Sans", sans-serif';
+    const paddingX = 18;
+    const paddingY = 12;
+    const metrics = ctx.measureText(text);
+    const bubbleW = Math.max(160, metrics.width + paddingX * 2);
+    const bubbleH = 46;
+
+    let bx = x - bubbleW / 2;
+    let by = y - bubbleH;
+
+    ctx.shadowColor = speaker === 'ai' ? 'rgba(6, 182, 212, 0.5)' : 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 16;
+
+    ctx.fillStyle = speaker === 'ai' ? '#0e2439' : '#1e293b';
+    ctx.strokeStyle = speaker === 'ai' ? '#06b6d4' : '#6366f1';
+    ctx.lineWidth = 2.5;
+
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bubbleW, bubbleH, 12);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.beginPath();
+    if (tailDirection === 'bottom-left') {
+      ctx.moveTo(bx + 30, by + bubbleH);
+      ctx.lineTo(bx + 15, by + bubbleH + 15);
+      ctx.lineTo(bx + 45, by + bubbleH);
+    } else if (tailDirection === 'bottom-right') {
+      ctx.moveTo(bx + bubbleW - 45, by + bubbleH);
+      ctx.lineTo(bx + bubbleW - 20, by + bubbleH + 15);
+      ctx.lineTo(bx + bubbleW - 30, by + bubbleH);
+    } else {
+      ctx.moveTo(bx + bubbleW / 2 - 10, by + bubbleH);
+      ctx.lineTo(bx + bubbleW / 2, by + bubbleH + 15);
+      ctx.lineTo(bx + bubbleW / 2 + 10, by + bubbleH);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    if (isSpeaking) {
+      const soundWaveX = speaker === 'ai' ? bx + 16 : bx + bubbleW - 24;
+      const waveH = Math.sin(currentTime * 25) * 6;
+      ctx.strokeStyle = speaker === 'ai' ? '#38bdf8' : '#a5b4fc';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(soundWaveX, by + 18 - waveH);
+      ctx.lineTo(soundWaveX, by + 28 + waveH);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, bx + bubbleW / 2, by + bubbleH / 2);
+
+    ctx.restore();
+  }
+
+  function drawStickman(x, y, pose, scale = 1, glowColor = null, isSpeaking = false) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+
+    if (glowColor) {
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = 20;
+      ctx.strokeStyle = '#ffffff';
+    } else {
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#f8fafc';
+    }
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    const headRadius = 22;
+    const headY = -90;
+
+    ctx.beginPath();
+    ctx.arc(0, headY, headRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    if (isSpeaking) {
+      const mouthOpen = Math.abs(Math.sin(currentTime * 22)) * 8 + 2;
+      ctx.fillStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.ellipse(0, headY + 5, 5, mouthOpen / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    if (pose.visor) {
+      ctx.fillStyle = '#06b6d4';
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 12;
+      ctx.fillRect(-12, headY - 4, 24, 8);
+    } else if (pose.sadFace) {
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.arc(-6, headY - 4, 2, 0, Math.PI * 2);
+      ctx.arc(6, headY - 4, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-7, headY + 2, 2, 6);
+      if (!isSpeaking) {
+        ctx.beginPath();
+        ctx.arc(0, headY + 10, 6, 1.2 * Math.PI, 1.8 * Math.PI);
+        ctx.stroke();
+      }
+    } else if (pose.happyFace && !isSpeaking) {
+      ctx.beginPath();
+      ctx.arc(0, headY + 2, 10, 0.2 * Math.PI, 0.8 * Math.PI);
+      ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(0, headY + headRadius);
+    ctx.lineTo(pose.spineEnd.x, pose.spineEnd.y);
+    ctx.stroke();
+
+    const shoulderY = headY + headRadius + 15;
+
+    ctx.beginPath();
+    ctx.moveTo(0, shoulderY);
+    ctx.lineTo(pose.leftElbow.x, pose.leftElbow.y);
+    ctx.lineTo(pose.leftHand.x, pose.leftHand.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(0, shoulderY);
+    ctx.lineTo(pose.rightElbow.x, pose.rightElbow.y);
+    ctx.lineTo(pose.rightHand.x, pose.rightHand.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(pose.spineEnd.x, pose.spineEnd.y);
+    ctx.lineTo(pose.leftKnee.x, pose.leftKnee.y);
+    ctx.lineTo(pose.leftFoot.x, pose.leftFoot.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(pose.spineEnd.x, pose.spineEnd.y);
+    ctx.lineTo(pose.rightKnee.x, pose.rightKnee.y);
+    ctx.lineTo(pose.rightFoot.x, pose.rightFoot.y);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function renderScene(t) {
+    drawBackground(t);
+    const floorY = 560;
+
+    if (t < 5.0) {
+      const shake = Math.sin(t * 30) * 2;
+      const slouch = Math.sin(t * 3) * 5;
+
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(520, floorY - 60, 240, 60);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(520, floorY - 60, 240, 60);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(600, floorY - 130, 80, 60);
+      ctx.strokeRect(600, floorY - 130, 80, 60);
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText('! ERR !', 615, floorY - 95);
+
+      for (let i = 0; i < 6; i++) {
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(535, floorY - 70 - i * 14, 45, 10);
+        ctx.strokeRect(535, floorY - 70 - i * 14, 45, 10);
+      }
+      for (let i = 0; i < 8; i++) {
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(695, floorY - 70 - i * 12, 45, 10);
+        ctx.strokeRect(695, floorY - 70 - i * 12, 45, 10);
+      }
+
+      const pose = {
+        sadFace: true,
+        spineEnd: { x: -10, y: -20 + slouch },
+        leftElbow: { x: -20, y: -50 },
+        leftHand: { x: -15, y: -80 },
+        rightElbow: { x: 25, y: -55 },
+        rightHand: { x: 45, y: -65 },
+        leftKnee: { x: -30, y: 15 },
+        leftFoot: { x: -35, y: 0 },
+        rightKnee: { x: 10, y: 15 },
+        rightFoot: { x: 20, y: 0 }
+      };
+
+      const stickX = 460 + shake;
+      const stickY = floorY - 20;
+      drawStickman(stickX, stickY, pose, 1.1, null, true);
+      playVoiceBlip('stickman');
+
+      if (t < 2.5) {
+        drawSpeechBubble(stickX - 40, stickY - 120, "😩 I have 500 tasks and no time!", 'stickman', 'bottom-right', true);
+      } else {
+        drawSpeechBubble(stickX - 40, stickY - 120, "💥 How can one person build all this?!", 'stickman', 'bottom-right', true);
+      }
+
+      ctx.fillStyle = '#f43f5e';
+      ctx.font = 'bold 22px "JetBrains Mono"';
+      ctx.fillText('99+ BUGS', 280, floorY - 160 + Math.sin(t * 5) * 8);
+      ctx.fillText('DEADLINE: TODAY', 680, floorY - 180 + Math.cos(t * 5) * 8);
+
+      drawCaption("01 • MANUAL OVERLOAD (0s - 5s)", "Stickman: 'I am completely overwhelmed by manual tasks!'", "#f43f5e");
+    } else if (t < 10.0) {
+      const sceneT = (t - 5.0) / 5.0;
+      const orbX = 740 + Math.sin(sceneT * Math.PI) * 30;
+      const orbY = 320 - Math.sin(sceneT * Math.PI) * 40;
+
+      const lookUp = Math.min(sceneT * 2, 1);
+      const isStickTalking = t >= 7.2;
+      const isAITalking = t < 7.2;
+
+      const pose = {
+        happyFace: true,
+        spineEnd: { x: 0, y: -20 },
+        leftElbow: { x: -35, y: -60 - lookUp * 25 },
+        leftHand: { x: -50, y: -90 - lookUp * 40 },
+        rightElbow: { x: 35, y: -60 - lookUp * 25 },
+        rightHand: { x: 50, y: -90 - lookUp * 40 },
+        leftKnee: { x: -20, y: 20 },
+        leftFoot: { x: -25, y: 0 },
+        rightKnee: { x: 20, y: 20 },
+        rightFoot: { x: 25, y: 0 }
+      };
+
+      const stickX = 420;
+      const stickY = floorY - 20;
+      drawStickman(stickX, stickY, pose, 1.1, 'rgba(6, 182, 212, 0.4)', isStickTalking);
+
+      const pulse = Math.sin(t * 12) * 8;
+      ctx.save();
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 35 + pulse;
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(orbX, orbY, 30 + pulse * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.6)';
+      ctx.lineWidth = 2;
+      for (let a = 0; a < 8; a++) {
+        const angle = t * 3 + a * (Math.PI / 4);
+        const rx = orbX + Math.cos(angle) * (55 + pulse);
+        const ry = orbY + Math.sin(angle) * (55 + pulse);
+        ctx.beginPath();
+        ctx.moveTo(orbX, orbY);
+        ctx.lineTo(rx, ry);
+        ctx.stroke();
+
+        ctx.fillStyle = '#818cf8';
+        ctx.beginPath();
+        ctx.arc(rx, ry, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(orbX, orbY);
+      ctx.quadraticCurveTo((orbX + stickX) / 2, orbY - 40, stickX, floorY - 120);
+      ctx.stroke();
+      ctx.restore();
+
+      if (isAITalking) {
+        playVoiceBlip('ai');
+        drawSpeechBubble(orbX, orbY - 40, "✨ Hello! Let's solve your backlog together!", 'ai', 'bottom-center', true);
+      } else {
+        playVoiceBlip('stickman');
+        drawSpeechBubble(stickX, stickY - 130, "😲 You can synthesize and code at 100x speed?!", 'stickman', 'bottom-center', true);
+      }
+
+      drawCaption("02 • THE AI SPARK (5s - 10s)", "AI: 'I will amplify your intelligence and handle the heavy lifting.'", "#06b6d4");
+    } else if (t < 15.5) {
+      const sceneT = (t - 10.0) / 5.5;
+      const flyX = 340 + sceneT * 180;
+      const hoverY = floorY - 90 + Math.sin(t * 8) * 14;
+
+      for (let i = 0; i < 3; i++) {
+        const hx = 640 + i * 150;
+        const hy = 220 + Math.sin(t * 4 + i) * 15;
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.strokeStyle = '#06b6d4';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#06b6d4';
+        ctx.shadowBlur = 15;
+        ctx.strokeRect(hx, hy, 130, 85);
+        ctx.fillRect(hx, hy, 130, 85);
+
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(hx + 10, hy + 15, 60, 6);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(hx + 10, hy + 28, 90, 6);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(hx + 10, hy + 41, 75, 6);
+
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(hx + 10, hy + 72);
+        ctx.lineTo(hx + 50, hy + 65);
+        ctx.lineTo(hx + 80, hy + 50);
+        ctx.lineTo(hx + 120, hy + 30);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(99, 102, 241, 0.7)';
+      ctx.beginPath();
+      ctx.moveTo(flyX - 10, hoverY - 70);
+      ctx.quadraticCurveTo(flyX - 70 - Math.sin(t * 10) * 20, hoverY - 40, flyX - 80, hoverY - 10);
+      ctx.lineTo(flyX - 10, hoverY - 30);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      const pose = {
+        visor: true,
+        spineEnd: { x: -10, y: -20 },
+        leftElbow: { x: -30, y: -50 },
+        leftHand: { x: -40, y: -30 },
+        rightElbow: { x: 40, y: -70 },
+        rightHand: { x: 80, y: -90 },
+        leftKnee: { x: -20, y: 15 },
+        leftFoot: { x: -35, y: 35 },
+        rightKnee: { x: 15, y: 10 },
+        rightFoot: { x: 30, y: 25 }
+      };
+
+      drawStickman(flyX, hoverY, pose, 1.2, '#6366f1', true);
+      playVoiceBlip('stickman');
+
+      ctx.save();
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 25;
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(flyX + 80, hoverY - 120, 18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = 3;
+      for (let s = 0; s < 6; s++) {
+        const sx = 150 + ((t * 450 + s * 200) % 1100);
+        const sy = 160 + s * 80;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(sx + 90, sy);
+        ctx.stroke();
+      }
+
+      if (t < 13.0) {
+        drawSpeechBubble(flyX + 60, hoverY - 130, "🚀 We just built & deployed in 10 seconds!", 'stickman', 'bottom-left', true);
+      } else {
+        drawSpeechBubble(flyX + 60, hoverY - 130, "⚡ Unlimited leverage unlocked!", 'stickman', 'bottom-left', true);
+      }
+
+      drawCaption("03 • 10X LEVERAGE (10s - 15.5s)", "Stickman: 'We just shipped an entire platform in seconds!'", "#10b981");
+    } else {
+      const sceneT = (t - 15.5) / 4.5;
+      const zoom = 1.0 + sceneT * 0.06;
+
+      ctx.save();
+      ctx.translate(640, 360);
+      ctx.scale(zoom, zoom);
+      ctx.translate(-640, -360);
+
+      ctx.fillStyle = '#1e1b4b';
+      ctx.beginPath();
+      ctx.moveTo(400, floorY);
+      ctx.lineTo(880, floorY);
+      ctx.lineTo(800, 720);
+      ctx.lineTo(480, 720);
+      ctx.closePath();
+      ctx.fill();
+
+      const pose = {
+        happyFace: true,
+        visor: true,
+        spineEnd: { x: 0, y: -20 },
+        leftElbow: { x: -35, y: -70 },
+        leftHand: { x: -50, y: -110 },
+        rightElbow: { x: 30, y: -55 },
+        rightHand: { x: 45, y: -70 },
+        leftKnee: { x: -18, y: 15 },
+        leftFoot: { x: -20, y: 0 },
+        rightKnee: { x: 18, y: 15 },
+        rightFoot: { x: 20, y: 0 }
+      };
+
+      const stickX = 580;
+      drawStickman(stickX, floorY, pose, 1.25, '#818cf8', true);
+      playVoiceBlip('stickman');
+
+      const orbPulse = Math.sin(t * 8) * 5;
+      ctx.save();
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = 30 + orbPulse;
+      ctx.fillStyle = '#22d3ee';
+      ctx.beginPath();
+      ctx.arc(690, floorY - 110 + Math.sin(t * 5) * 6, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      drawSpeechBubble(stickX, floorY - 150, "🌟 AI gives humans superpowers to create anything!", 'stickman', 'bottom-center', true);
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 12;
+
+      ctx.font = '800 34px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('AI DOES NOT REPLACE YOU.', 640, 160);
+
+      const gradText = ctx.createLinearGradient(400, 200, 880, 200);
+      gradText.addColorStop(0, '#38bdf8');
+      gradText.addColorStop(0.5, '#818cf8');
+      gradText.addColorStop(1, '#ec4899');
+      ctx.fillStyle = gradText;
+      ctx.font = '800 42px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('IT EMPOWERS YOU.', 640, 205);
+      ctx.restore();
+
+      ctx.restore();
+
+      drawCaption("04 • THE FUTURE (15.5s - 20s)", "Stickman: 'Human Vision + AI Velocity = The Future of Creation.'", "#ec4899");
+    }
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.fillRect(40, 30, 1200, 4);
+    ctx.fillStyle = '#6366f1';
+    ctx.fillRect(40, 30, (t / DURATION) * 1200, 4);
+  }
+
+  function drawCaption(tag, text, tagColor) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(10, 15, 26, 0.88)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 1;
+
+    const boxW = 760;
+    const boxH = 68;
+    const boxX = (1280 - boxW) / 2;
+    const boxY = 620;
+
+    ctx.beginPath();
+    ctx.roundRect(boxX, boxY, boxW, boxH, 12);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = 'bold 12px "JetBrains Mono", monospace';
+    ctx.fillStyle = tagColor;
+    ctx.fillText(tag, boxX + 24, boxY + 28);
+
+    ctx.font = '600 16px "Plus Jakarta Sans", sans-serif';
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText(text, boxX + 24, boxY + 52);
+    ctx.restore();
+  }
+
+  function tick(timestamp) {
+    if (!lastTimestamp) lastTimestamp = timestamp;
+    const delta = (timestamp - lastTimestamp) / 1000;
+    lastTimestamp = timestamp;
+
+    if (isPlaying) {
+      currentTime += delta;
+      if (currentTime >= DURATION) {
+        currentTime = DURATION;
+        pause();
+      }
+      triggerSceneAudio(currentTime);
+      updateUI();
+    }
+
+    renderScene(currentTime);
+
+    if (isPlaying) {
+      requestAnimationFrame(tick);
+    }
+  }
+
+  function play() {
+    initAudio();
+    if (currentTime >= DURATION) {
+      currentTime = 0;
+      soundEventsTriggered = {};
+    }
+    isPlaying = true;
+    lastTimestamp = null;
+    playIcon.textContent = '⏸';
+    playText.textContent = 'Pause';
+    requestAnimationFrame(tick);
+  }
+
+  function pause() {
+    isPlaying = false;
+    playIcon.textContent = '▶';
+    playText.textContent = 'Play';
+  }
+
+  function updateUI() {
+    const pct = (currentTime / DURATION) * 100;
+    scrubberFill.style.width = pct + '%';
+    const curSec = Math.floor(currentTime);
+    const curMs = Math.floor((currentTime % 1) * 10);
+    timeLabel.textContent = `00:${curSec.toString().padStart(2, '0')}.${curMs} / 00:20.0`;
+
+    scenePills.forEach(p => {
+      const pt = parseFloat(p.dataset.time);
+      const nextPill = p.nextElementSibling;
+      const nextTime = nextPill ? parseFloat(nextPill.dataset.time) : DURATION;
+      if (currentTime >= pt && currentTime < nextTime) {
+        p.classList.add('active');
+      } else {
+        p.classList.remove('active');
+      }
+    });
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (isPlaying) pause();
+    else play();
+  });
+
+  restartBtn.addEventListener('click', () => {
+    currentTime = 0;
+    soundEventsTriggered = {};
+    updateUI();
+    play();
+  });
+
+  audioToggle.addEventListener('click', () => {
+    audioEnabled = !audioEnabled;
+    audioToggle.textContent = audioEnabled ? '🔊 Voice & FX: ON' : '🔇 Voice & FX: OFF';
+  });
+
+  scenePills.forEach(p => {
+    p.addEventListener('click', () => {
+      currentTime = parseFloat(p.dataset.time);
+      soundEventsTriggered = {};
+      updateUI();
+      renderScene(currentTime);
+    });
+  });
+
+  function seek(e) {
+    const rect = scrubberTrack.getBoundingClientRect();
+    const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    currentTime = pos * DURATION;
+    soundEventsTriggered = {};
+    updateUI();
+    renderScene(currentTime);
+  }
+
+  let isScrubbing = false;
+  scrubberTrack.addEventListener('pointerdown', (e) => {
+    isScrubbing = true;
+    seek(e);
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (isScrubbing) seek(e);
+  });
+  window.addEventListener('pointerup', () => {
+    isScrubbing = false;
+  });
+
+  exportBtn.addEventListener('click', async () => {
+    if (!('MediaRecorder' in window)) {
+      alert('MediaRecorder API not supported in this browser.');
+      return;
+    }
+
+    exportBtn.disabled = true;
+    exportBtn.textContent = '⏳ Rendering 20s Video...';
+    exportStateText.textContent = 'Encoding 1,200 frames (60fps x 20s) into WebM video file...';
+    pause();
+
+    const stream = canvas.captureStream(60);
+    const mediaRecorder = new MediaRecorder(stream, {
+      mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm'
+    });
+
+    const chunks = [];
+    mediaRecorder.ondataavailable = e => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'stickman-ai-importance-20s.webm';
+      a.click();
+      URL.revokeObjectURL(url);
+
+      exportBtn.disabled = false;
+      exportBtn.textContent = '⬇ Export 20s Video (WebM)';
+      exportStateText.textContent = '✅ Video downloaded successfully (20.0s 60fps WebM)!';
+    };
+
+    mediaRecorder.start();
+    currentTime = 0;
+    soundEventsTriggered = {};
+    isPlaying = true;
+    lastTimestamp = null;
+
+    const exportInterval = setInterval(() => {
+      if (currentTime >= DURATION) {
+        clearInterval(exportInterval);
+        pause();
+        setTimeout(() => mediaRecorder.stop(), 200);
+      }
+    }, 100);
+
+    requestAnimationFrame(tick);
+  });
+
+  renderScene(0);
+  updateUI();
+})();
+</script>
