@@ -359,7 +359,7 @@ export const useFlowStore = create<FlowState>((set, get) => {
           y: nodeToDup.position.y + 30,
         },
         data: {
-          ...JSON.parse(JSON.stringify(nodeToDup.data)),
+          ...structuredClone(nodeToDup.data),
           label: `${nodeToDup.data.label} (Copy)`,
           status: "idle",
         },

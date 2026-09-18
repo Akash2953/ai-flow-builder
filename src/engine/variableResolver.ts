@@ -4,22 +4,8 @@ import { NodeOutputMap } from "../types/execution";
  * Safely traverses an object or value by dot notation path (e.g., "output.summary.score")
  */
 function getNestedValue(obj: any, path: string): any {
-  if (obj === undefined || obj === null) return undefined;
-  if (!path || path.trim() === "") return obj;
-
-  const parts = path.split(".");
-  let current = obj;
-
-  for (const part of parts) {
-    if (current === undefined || current === null) return undefined;
-    if (typeof current === "object" && part in current) {
-      current = current[part];
-    } else {
-      return undefined;
-    }
-  }
-
-  return current;
+  if (!obj || !path?.trim()) return obj;
+  return path.split(".").reduce((acc, key) => (acc && typeof acc === "object" ? acc[key] : undefined), obj);
 }
 
 /**
