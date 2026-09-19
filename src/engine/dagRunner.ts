@@ -432,22 +432,21 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
     logs: [],
   }));
 
-  // Assign steps to run
-  if (execStore.currentRun) {
-    useExecutionStore.setState((state) => ({
-      currentRun: state.currentRun ? { ...state.currentRun, steps: initialSteps } : null,
-    }));
-  }
+  // Assign initial steps to current run
+  useExecutionStore.setState((state) => ({
+    currentRun: state.currentRun ? { ...state.currentRun, steps: initialSteps } : null,
+  }));
 
   try {
     for (let i = 0; i < nodesToRun.length; i++) {
       const node = nodesToRun[i];
       const step = initialSteps[i];
+      const currentExecStore = useExecutionStore.getState();
 
       // Check if node is skipped by upstream condition branch
       if (skippedNodes.has(node.id)) {
         flowStore.updateNodeStatus(node.id, "idle", undefined, "Skipped by condition branch");
-        execStore.updateStep(step.id, { status: "idle", logs: ["[Info] Node skipped by upstream branch"] });
+        currentExecStore.updateStep(step.id, { status: "idle", logs: ["[Info] Node skipped by upstream branch"] });
         continue;
       }
 
@@ -460,7 +459,7 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
       for (const edge of incomingEdges) {
         const sourceNode = nodeMap.get(edge.source);
         if (sourceNode?.type === "condition") {
-          const sourceOutput = execStore.nodeOutputs[edge.source]?.output;
+          const sourceOutput = currentExecStore.nodeOutputs[edge.source]?.output;
           const conditionOutcome = sourceOutput?.branch; // "true" | "false"
           if (edge.sourceHandle && edge.sourceHandle !== conditionOutcome) {
             shouldSkipCurrent = true;
@@ -475,15 +474,15 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
         downstreamEdges.forEach((e) => skippedNodes.add(e.target));
 
         flowStore.updateNodeStatus(node.id, "idle", undefined, "Branch not taken");
-        execStore.updateStep(step.id, { status: "idle", logs: ["[Info] Branch not active"] });
+        currentExecStore.updateStep(step.id, { status: "idle", logs: ["[Info] Branch not active"] });
         continue;
       }
 
       // Set node to running
-      const prevOutput = previousNodeId ? execStore.nodeOutputs[previousNodeId]?.output : undefined;
+      const prevOutput = previousNodeId ? currentExecStore.nodeOutputs[previousNodeId]?.output : undefined;
       flowStore.updateNodeStatus(node.id, "running");
-      execStore.setActiveNodeId(node.id);
-      execStore.updateStep(step.id, {
+      currentExecStore.setActiveNodeId(node.id);
+      currentExecStore.updateStep(step.id, {
         status: "running",
         startedAt: new Date().toISOString(),
         inputPayload: prevOutput,
@@ -497,7 +496,7 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
         const durationMs = Date.now() - nodeStartTime;
 
         // Record output
-        execStore.recordStepOutput(
+        useExecutionStore.getState().recordStepOutput(
           node.id,
           result.output,
           "success",
@@ -527,20 +526,20 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
         const durationMs = Date.now() - nodeStartTime;
         const errMsg = nodeError.message || String(nodeError);
 
-        execStore.addLog(step.id, `[ERROR] ${errMsg}`);
-        execStore.recordStepOutput(node.id, null, "error", durationMs, errMsg);
+        useExecutionStore.getState().addLog(step.id, `[ERROR] ${errMsg}`);
+        useExecutionStore.getState().recordStepOutput(node.id, null, "error", durationMs, errMsg);
         flowStore.updateNodeStatus(node.id, "error", errMsg, "Failed", durationMs);
 
-        execStore.finishRun("error", errMsg);
+        useExecutionStore.getState().finishRun("error", errMsg);
         return { success: false, error: errMsg };
       }
     }
 
-    execStore.finishRun("success");
+    useExecutionStore.getState().finishRun("success");
     return { success: true };
   } catch (globalError: any) {
     const errorMsg = globalError.message || String(globalError);
-    execStore.finishRun("error", errorMsg);
+    useExecutionStore.getState().finishRun("error", errorMsg);
     return { success: false, error: errorMsg };
   }
 }

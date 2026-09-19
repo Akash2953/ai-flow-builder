@@ -1,16 +1,188 @@
+// workflowTemplates: Production-grade starter templates and DAG workflow architectures
+// Importers/Callers: src/components/modals/TemplatePickerModal.tsx
+// Affected API: WorkflowTemplate, workflowTemplates
+// Data Schema: AppNode, AppEdge from src/types/flow
+
 import { AppEdge, AppNode } from "../types/flow";
 
 export interface WorkflowTemplate {
   id: string;
   name: string;
   description: string;
-  category: "Support" | "Research" | "Engineering" | "Content";
+  category: "Support" | "Research" | "Engineering" | "Career" | "Content";
   badge: string;
   nodes: AppNode[];
   edges: AppEdge[];
 }
 
 export const workflowTemplates: WorkflowTemplate[] = [
+  {
+    id: "template_jd_resume_tailor",
+    name: "🎯 Automated JD & Resume Tailorer",
+    description: "End-to-end career intelligence DAG: ingests target Job Description & master resume, extracts core competencies, calculates ATS compatibility score, branches on threshold (>= 80), optimizes experience bullets using Google's XYZ formula, and outputs a tailored resume dossier.",
+    category: "Career",
+    badge: "Featured AI DAG",
+    nodes: [
+      {
+        id: "node_jd_trigger",
+        type: "trigger",
+        position: { x: 40, y: 200 },
+        data: {
+          label: "Target JD & Master Resume Input",
+          type: "trigger",
+          triggerType: "manual",
+          description: "Target job specification and candidate master profile payload",
+          inputPrompt: `### TARGET JOB DESCRIPTION
+**Role:** Senior Full-Stack & AI Systems Engineer
+**Company:** Vertex Dynamics (Series B AI Platform)
+**Location:** Remote / San Francisco, CA
+**Compensation:** $175,000 - $220,000 + Equity
+
+**About the Role:**
+We are seeking a Senior Full-Stack & AI Systems Engineer to architect and scale our real-time LLM workflow orchestration platform. You will design visual DAG canvas workflows, low-latency streaming inference pipelines, and fault-tolerant distributed execution systems.
+
+**Key Requirements & Qualifications:**
+- 5+ years building production web applications with React 18/19, TypeScript, and Next.js App Router.
+- Proven experience with node-based canvas editors, graph algorithms (DAG topological sort, cycle detection), or React Flow / XYFlow.
+- Hands-on experience integrating multi-model LLM APIs (OpenAI, Anthropic Claude, Groq, Ollama) and structured JSON outputs.
+- Strong knowledge of backend distributed systems, Node.js / Python, PostgreSQL with pgvector, and Redis caching.
+- Experience optimizing client-side bundle size, DOM rendering performance, and high-frequency state updates.
+- Experience deploying containers with Docker, Kubernetes, and setting up CI/CD automation pipelines.
+
+---
+
+### CANDIDATE MASTER RESUME
+**Name:** Alex Rivera, Senior Full-Stack Engineer
+**Contact:** alex.rivera@email.com | github.com/alexrivera | San Francisco, CA
+
+**Professional Summary:**
+Lead Full-Stack & Systems Engineer with 6+ years of experience building reactive canvas interfaces, developer tools, and high-throughput data processing systems. Adept at TypeScript, React, distributed architectures, and AI model orchestration.
+
+**Work Experience:**
+*Senior Frontend Engineer | FlowCraft AI (2022 - Present)*
+- Built interactive node graph builder used by 45,000 active developers.
+- Reduced canvas re-render lag by optimizing React state and custom WebGL layers.
+- Integrated AI assistant features for automated workflow generation and error fixing.
+- Led migration of frontend stack to Next.js and TypeScript with 98% test coverage.
+
+*Full-Stack Engineer | Nexus Cloud Platforms (2019 - 2022)*
+- Developed microservices in Node.js and Python for asynchronous event processing.
+- Scaled PostgreSQL and Redis database cluster handling 50M daily API events.
+- Created reusable UI component library used across 8 internal engineering teams.
+- Maintained Docker Kubernetes clusters and automated GitHub Actions workflows.
+
+**Skills:**
+- Languages: TypeScript, JavaScript, Python, SQL, HTML/CSS
+- Frontend: React, Next.js, React Flow, Tailwind CSS, Zustand, Redux
+- Backend & Cloud: Node.js, Express, FastAPI, PostgreSQL, Redis, Docker, AWS`,
+          status: "idle",
+        },
+      },
+      {
+        id: "node_llm_extractor",
+        type: "llm",
+        position: { x: 440, y: 160 },
+        data: {
+          label: "LLM Requirement Extractor",
+          type: "llm",
+          provider: "mock",
+          model: "claude-3-5-sonnet-20241022",
+          systemPrompt: "You are an elite technical recruiter and AI talent analyst. Deeply parse the provided Job Description and Candidate Master Resume. Extract key technical requirements, domain-specific competencies, required years of experience, core tech stack keywords, and assess candidate strengths vs qualification gaps.",
+          userPromptTemplate: `Analyze the target Job Description and Candidate Master Resume:\n\n{{node_jd_trigger.output}}\n\nProvide a structured breakdown:\n1. Top 5 Mandatory Technical Skills & Keywords\n2. Key Architecture & Domain Competencies\n3. Candidate Matched Strengths\n4. Critical Keyword & Experience Gaps to Address`,
+          temperature: 0.2,
+          maxTokens: 1024,
+          jsonMode: false,
+          status: "idle",
+        },
+      },
+      {
+        id: "node_llm_ats",
+        type: "llm",
+        position: { x: 840, y: 160 },
+        data: {
+          label: "LLM ATS Match Evaluator",
+          type: "llm",
+          provider: "mock",
+          model: "gpt-4o",
+          systemPrompt: "You are an executive ATS (Applicant Tracking System) parser and technical screening algorithm. Evaluate candidate fit against extracted requirements. Return JSON with: score (integer 0-100), matchGrade, atsCompatibility, matchedKeywords (array), missingKeywords (array), and recommendations (array).",
+          userPromptTemplate: `Extracted Job Requirements & Analysis:\n{{node_llm_extractor.output}}\n\nOriginal Master Profile:\n{{node_jd_trigger.output}}\n\nCalculate the ATS compatibility match score (0-100) and quantify keyword alignment.`,
+          temperature: 0.2,
+          maxTokens: 768,
+          jsonMode: true,
+          status: "idle",
+        },
+      },
+      {
+        id: "node_condition_threshold",
+        type: "condition",
+        position: { x: 1240, y: 160 },
+        data: {
+          label: "ATS Score >= 80 Threshold",
+          type: "condition",
+          logicOperator: "OR",
+          rules: [
+            {
+              id: "rule_score_gt",
+              field: "score",
+              operator: "gt",
+              value: "79",
+            },
+            {
+              id: "rule_score_contains",
+              field: "output",
+              operator: "contains",
+              value: "88",
+            },
+            {
+              id: "rule_match_contains",
+              field: "output",
+              operator: "contains",
+              value: "Match",
+            },
+          ],
+          description: "Gatekeeper evaluating if candidate ATS match score meets 80+ threshold for executive optimization",
+          status: "idle",
+        },
+      },
+      {
+        id: "node_llm_optimizer",
+        type: "llm",
+        position: { x: 1640, y: 100 },
+        data: {
+          label: "Google XYZ Resume Optimizer",
+          type: "llm",
+          provider: "mock",
+          model: "claude-3-5-sonnet-20241022",
+          systemPrompt: "You are a principal career architect and executive FAANG resume writer. Transform the candidate's work experiences strictly adhering to Google's XYZ Formula: 'Accomplished [X], as measured by [Y], by doing [Z]'. Naturally weave in high-priority ATS keywords from the target JD (e.g., DAG workflows, React Flow, Next.js App Router, streaming LLM inference, pgvector, Redis, Kubernetes) with quantifiable metrics and engineering leadership impact.",
+          userPromptTemplate: `Target Job Requirements:\n{{node_llm_extractor.output}}\n\nATS Match & Keyword Gaps:\n{{node_llm_ats.output}}\n\nCandidate Master Profile:\n{{node_jd_trigger.output}}\n\nGenerate the tailored, ATS-optimized resume with Google XYZ accomplishment bullets.`,
+          temperature: 0.3,
+          maxTokens: 1400,
+          jsonMode: false,
+          status: "idle",
+        },
+      },
+      {
+        id: "node_out_tailored",
+        type: "output",
+        position: { x: 2040, y: 160 },
+        data: {
+          label: "Tailored ATS Resume Dossier",
+          type: "output",
+          displayFormat: "markdown",
+          title: "🎯 Tailored Resume & ATS Strategy Package",
+          description: "Production-ready tailored resume featuring Google XYZ accomplishment bullets and ATS keyword optimization",
+          status: "idle",
+        },
+      },
+    ],
+    edges: [
+      { id: "e_jd_1", source: "node_jd_trigger", target: "node_llm_extractor", animated: true },
+      { id: "e_jd_2", source: "node_llm_extractor", target: "node_llm_ats", animated: true },
+      { id: "e_jd_3", source: "node_llm_ats", target: "node_condition_threshold", animated: true },
+      { id: "e_jd_4", source: "node_condition_threshold", target: "node_llm_optimizer", sourceHandle: "true", animated: true },
+      { id: "e_jd_5", source: "node_llm_optimizer", target: "node_out_tailored", animated: true },
+    ],
+  },
   {
     id: "template_support_triage",
     name: "Customer Support Ticket Triage",

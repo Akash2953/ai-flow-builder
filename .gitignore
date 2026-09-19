@@ -32,5 +32,9 @@ pnpm-debug.log*
 *.sw?
 Thumbs.db
 
-# Claude Code
+# Claude Code & local tools
 .claude/
+graphify-out/
+*.tsbuildinfo
+vite.config.d.ts
+vite.config.js

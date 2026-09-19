@@ -1,0 +1,2281 @@
+<!-- Importers/Callers: Artifact Viewer & Claude Code interactive browser sandbox -->
+<!-- Affected API: None (standalone HTML Artifact application) -->
+<!-- Data Schema: HTML5, CSS tokens, DOM JavaScript for DAG simulation -->
+<!-- User Instruction: "craete an artifact that will have this" -->
+
+<title>AI Flow Builder</title>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-base: #FAF8F5;
+    --bg-surface: #F5F2EB;
+    --bg-surface-subtle: #FAF8F5;
+    --bg-surface-elevated: #FFFFFF;
+    --bg-inset: #EBE6DD;
+    --border: #E7E2D8;
+    --border-color: #E7E2D8;
+    --border-subtle: #F0ECE1;
+    --text-primary: #2C2724;
+    --text-secondary: #7A7269;
+    --text-tertiary: #A09689;
+    --accent: #D97706;
+    --accent-hover: #B45309;
+    --accent-subtle: rgba(217, 119, 6, 0.1);
+    --shadow-soft: 0 4px 20px -2px rgba(180, 165, 145, 0.22);
+    --shadow-card: 0 2px 10px -1px rgba(180, 165, 145, 0.15);
+
+    --color-trigger: #D97706;
+    --color-llm: #0284C7;
+    --color-condition: #7C3AED;
+    --color-transform: #059669;
+    --color-http: #0D9488;
+    --color-output: #E11D48;
+    --color-success: #10B981;
+    --color-error: #EF4444;
+    --on-accent: #FFFFFF;
+    --accent-glow: rgba(217, 119, 6, 0.25);
+
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg-base: #080d18;
+      --bg-surface: #0c1220;
+      --bg-surface-subtle: #080d18;
+      --bg-surface-elevated: #131b2e;
+      --bg-inset: #182238;
+      --border: #1e293b;
+      --border-color: #1e293b;
+      --border-subtle: #141f33;
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-tertiary: #64748B;
+      --accent: #38BDF8;
+      --accent-hover: #0EA5E9;
+      --accent-subtle: rgba(56, 189, 248, 0.12);
+      --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+      --shadow-card: 0 2px 10px -1px rgba(0, 0, 0, 0.3);
+
+      --color-trigger: #F59E0B;
+      --color-llm: #38BDF8;
+      --color-condition: #A855F7;
+      --color-transform: #34D399;
+      --color-http: #2DD4BF;
+      --color-output: #FB7185;
+      --color-success: #34D399;
+      --color-error: #F87171;
+      --on-accent: #082F49;
+      --accent-glow: rgba(56, 189, 248, 0.28);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    --bg-base: #080d18;
+    --bg-surface: #0c1220;
+    --bg-surface-subtle: #080d18;
+    --bg-surface-elevated: #131b2e;
+    --bg-inset: #182238;
+    --border: #1e293b;
+    --border-color: #1e293b;
+    --border-subtle: #141f33;
+    --text-primary: #F1F5F9;
+    --text-secondary: #94A3B8;
+    --text-tertiary: #64748B;
+    --accent: #38BDF8;
+    --accent-hover: #0EA5E9;
+    --accent-subtle: rgba(56, 189, 248, 0.12);
+    --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 2px 10px -1px rgba(0, 0, 0, 0.3);
+
+    --color-trigger: #F59E0B;
+    --color-llm: #38BDF8;
+    --color-condition: #A855F7;
+    --color-transform: #34D399;
+    --color-http: #2DD4BF;
+    --color-output: #FB7185;
+    --color-success: #34D399;
+    --color-error: #F87171;
+    --on-accent: #082F49;
+    --accent-glow: rgba(56, 189, 248, 0.28);
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    padding-inline: 24px;
+    padding-block: 32px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1040px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  /* Header & Hero */
+  .hero-header {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: var(--shadow-soft);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    background: var(--bg-surface-elevated);
+    color: var(--text-secondary);
+  }
+
+  .badge-pro {
+    background: var(--accent-subtle);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .badge-valid {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+
+  .hero-title {
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 720px;
+    line-height: 1.6;
+  }
+
+  /* Navigation Tabs */
+  .tab-nav {
+    display: flex;
+    gap: 8px;
+    background: var(--bg-surface);
+    padding: 6px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 50;
+    backdrop-filter: blur(12px);
+  }
+
+  .tab-btn {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-inset);
+  }
+
+  .tab-btn.active {
+    background: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border);
+  }
+
+  /* Card and Sections */
+  .section-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  /* Interactive Pipeline Simulation */
+  .simulator-box {
+    background: var(--bg-base);
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sim-canvas {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 16px 8px;
+  }
+
+  .sim-node {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    min-width: 170px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    transition: all 0.25s ease;
+    cursor: pointer;
+  }
+
+  .sim-node.active-step {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-subtle), 0 4px 16px rgba(217, 119, 6, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .sim-node.completed-step {
+    border-color: var(--color-success);
+  }
+
+  .sim-node-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sim-node-tag {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  .tag-trigger { background: rgba(217, 119, 6, 0.15); color: var(--color-trigger); }
+  .tag-llm { background: rgba(2, 132, 199, 0.15); color: var(--color-llm); }
+  .tag-condition { background: rgba(124, 58, 237, 0.15); color: var(--color-condition); }
+  .tag-output { background: rgba(225, 29, 72, 0.15); color: var(--color-output); }
+
+  .sim-node-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .sim-node-body {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-secondary);
+    background: var(--bg-inset);
+    padding: 4px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sim-arrow {
+    color: var(--text-tertiary);
+    font-weight: bold;
+    font-size: 18px;
+    user-select: none;
+  }
+
+  .sim-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 10px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .btn {
+    appearance: none;
+    border: none;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: 0 2px 8px var(--accent-glow);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: var(--bg-inset);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg-surface-elevated);
+  }
+
+  /* Node Catalog Grid */
+  .nodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .node-item-card {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .node-item-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
+  }
+
+  .node-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .node-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .icon-trigger { background: rgba(217, 119, 6, 0.15); color: var(--color-trigger); }
+  .icon-llm { background: rgba(2, 132, 199, 0.15); color: var(--color-llm); }
+  .icon-condition { background: rgba(124, 58, 237, 0.15); color: var(--color-condition); }
+  .icon-transform { background: rgba(5, 150, 105, 0.15); color: var(--color-transform); }
+  .icon-http { background: rgba(13, 148, 136, 0.15); color: var(--color-http); }
+  .icon-output { background: rgba(225, 29, 72, 0.15); color: var(--color-output); }
+
+  .node-card-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .node-card-category {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .node-card-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .node-syntax-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--bg-inset);
+    color: var(--text-primary);
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Interactive Variable Playground */
+  .playground-box {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .input-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+  }
+
+  .interactive-textarea {
+    width: 100%;
+    min-height: 80px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-primary);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .interactive-textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-subtle);
+  }
+
+  .chip-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .var-chip {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .var-chip:hover {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--accent);
+  }
+
+  .output-preview-box {
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    min-height: 60px;
+  }
+
+  /* Step by Step List */
+  .tutorial-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .tutorial-step {
+    display: flex;
+    gap: 16px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-subtle);
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .step-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .step-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* Code / Table formatting */
+  .code-snippet {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+    color: var(--text-primary);
+  }
+
+  .shortcut-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .shortcut-table th, .shortcut-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .shortcut-table th {
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+  }
+
+  .shortcut-table td {
+    color: var(--text-primary);
+  }
+
+  .kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-primary);
+    box-shadow: 0 1px 0 var(--border);
+  }
+
+  /* Blueprint / Flow Chart Styles */
+  .blueprint-dag {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 16px 0 24px 0;
+  }
+
+  .blueprint-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .dag-node-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dag-node-pill.pill-trigger { border-left: 4px solid var(--color-trigger); }
+  .dag-node-pill.pill-llm { border-left: 4px solid var(--color-llm); }
+  .dag-node-pill.pill-condition { border-left: 4px solid var(--color-condition); }
+  .dag-node-pill.pill-transform { border-left: 4px solid var(--color-transform); }
+  .dag-node-pill.pill-output { border-left: 4px solid var(--color-output); }
+
+  .dag-arrow {
+    color: var(--text-tertiary);
+    font-weight: 800;
+    font-size: 14px;
+  }
+
+  .dag-branch-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 20px;
+    padding-left: 16px;
+    border-left: 2px dashed var(--border);
+  }
+
+  .branch-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .branch-tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .branch-tag.true-tag { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+  .branch-tag.false-tag { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
+
+  /* Spec and Prompt Cards */
+  .spec-card {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .spec-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .spec-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .copy-btn:hover {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--accent);
+  }
+
+  .spec-table {
+    width: 100%;
+    font-size: 12px;
+    margin: 8px 0;
+    border-collapse: collapse;
+  }
+
+  .spec-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .spec-table td:first-child {
+    font-weight: 600;
+    color: var(--text-secondary);
+    width: 140px;
+  }
+
+  .prompt-pre {
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    overflow-x: auto;
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+
+  /* Blueprint DAG Nodes & Flow */
+  .blueprint-node {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-width: 140px;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .blueprint-node:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+  }
+  .blueprint-node-tag {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+  .blueprint-node-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .blueprint-node-sub {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    margin-top: 2px;
+  }
+  .blueprint-arrow {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* Guide Step Cards & Specs */
+  .guide-step-card {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-card);
+  }
+  .guide-step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 10px;
+  }
+  .guide-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-subtle);
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .guide-step-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .guide-step-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  .guide-step-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .spec-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    padding: 4px 0;
+  }
+  .spec-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 130px;
+  }
+  .spec-val {
+    color: var(--text-primary);
+  }
+
+  /* Simulator Status Pills */
+  .sim-pill {
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+  .sim-pill.active-step,
+  .sim-pill.rsim-active {
+    background: var(--accent-subtle);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 700;
+    box-shadow: 0 0 10px var(--accent-subtle);
+    animation: pulseGlow 1.2s infinite alternate ease-in-out;
+  }
+  .sim-pill.completed-step,
+  .sim-pill.rsim-done {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: #10B981;
+    color: #10B981;
+    font-weight: 700;
+  }
+  .sim-pill.skipped-step,
+  .sim-pill.rsim-skip {
+    opacity: 0.4;
+    text-decoration: line-through;
+    border-color: var(--border);
+  }
+  @keyframes pulseGlow {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.04); }
+  }
+  .select-field {
+    font-family: var(--font-sans);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .select-field:focus {
+    border-color: var(--accent);
+  }
+
+  /* Code Block styling */
+  .code-block {
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 8px 0;
+  }
+
+  /* Theme Toggle Button */
+  .theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    box-shadow: var(--shadow-card);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .theme-toggle-btn:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+  }
+  .theme-toggle-btn:active {
+    transform: translateY(0);
+  }
+</style>
+
+<div class="container">
+  <!-- Header / Hero -->
+  <header class="hero-header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+      <div class="hero-badge-row" style="margin-bottom: 0;">
+        <span class="badge badge-pro">Visual DAG Engine</span>
+        <span class="badge badge-valid">● DAG Valid</span>
+        <span class="badge">Multi-Model LLMs</span>
+        <span class="badge">Tactile Clay &amp; Dark Mode</span>
+      </div>
+      <button class="theme-toggle-btn" id="guideThemeToggle" onclick="toggleGuideTheme()" title="Toggle Light / Dark Theme">
+        <span id="theme-toggle-icon">☀️</span>
+        <span id="theme-toggle-text">Theme</span>
+      </button>
+    </div>
+    <h1 class="hero-title">AI Flow Builder Interactive Guide</h1>
+    <p class="hero-subtitle">
+      Master visual DAG AI pipeline creation. Connect entrypoint triggers, multi-model LLMs (Claude, GPT-4o, Gemini, DeepSeek), boolean branching logic, and sandboxed transformations.
+    </p>
+  </header>
+
+  <!-- Sticky Navigation Tabs -->
+  <nav class="tab-nav" id="tabNav">
+    <button class="tab-btn active" onclick="switchSection('overview')">✦ Overview</button>
+    <button class="tab-btn" onclick="switchSection('resume-guide')">🎯 JD &amp; Resume Matcher Guide</button>
+    <button class="tab-btn" onclick="switchSection('simulator')">▶ Interactive Simulator</button>
+    <button class="tab-btn" onclick="switchSection('nodes')">⑂ Node Catalog (6)</button>
+    <button class="tab-btn" onclick="switchSection('variables')">❴❵ Variable Resolver</button>
+    <button class="tab-btn" onclick="switchSection('tutorial')">📋 Quick 5-Step Tutorial</button>
+    <button class="tab-btn" onclick="switchSection('shortcuts')">⌨ Cheatsheet</button>
+  </nav>
+
+  <!-- SECTION 1: OVERVIEW -->
+  <section class="section-card" id="sec-overview">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Workspace Architecture</h2>
+        <p class="section-desc">The visual pipeline builder is structured into five cohesive panels</p>
+      </div>
+    </div>
+
+    <div class="nodes-grid">
+      <div class="node-item-card">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-trigger">⚡</div>
+          <div>
+            <div class="node-card-name">1. Top Navigation Bar</div>
+            <div class="node-card-category">Workflow Header</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Displays DAG validation status, Run button, starter template loader, JSON Import/Export, Settings modal, and instant Light/Dark theme toggle.
+        </p>
+      </div>
+
+      <div class="node-item-card">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-llm">✦</div>
+          <div>
+            <div class="node-card-name">2. Node Library Sidebar</div>
+            <div class="node-card-category">Left Panel</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Browse categorized building blocks (Triggers, AI Agents, Logic, Transforms, HTTP Integrations, Output Viewers). Drag any card directly onto the canvas.
+        </p>
+      </div>
+
+      <div class="node-item-card">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-condition">⑂</div>
+          <div>
+            <div class="node-card-name">3. Interactive Flow Canvas</div>
+            <div class="node-card-category">Center Viewport</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Powered by React Flow v12. Connect output handles to input handles, zoom, pan, toggle grid patterns, and overview your pipeline using the reactive MiniMap.
+        </p>
+      </div>
+
+      <div class="node-item-card">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-transform">⚙</div>
+          <div>
+            <div class="node-card-name">4. Property Inspector</div>
+            <div class="node-card-category">Right Panel</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Click any node on the canvas to configure prompts, model parameters (temperature, max tokens), boolean routing rules, or sandboxed JS scripts.
+        </p>
+      </div>
+
+      <div class="node-item-card" style="grid-column: 1 / -1;">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-output">▤</div>
+          <div>
+            <div class="node-card-name">5. Execution Telemetry Drawer</div>
+            <div class="node-card-category">Bottom Drawer</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Slides up during workflow runs. Inspect node execution durations (e.g. 23ms, 546ms), token consumption, real-time log streams, formatted Markdown outputs, and raw JSON payload snapshots.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: REAL-WORLD JD & RESUME MATCHER GUIDE -->
+  <section class="section-card" id="sec-resume-guide" style="display: none;">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">🎯 Real-World Blueprint: Automated JD &amp; Resume Matcher</h2>
+        <p class="section-desc">
+          Build a complete compound AI pipeline that ingests any Job Description, calculates an ATS match score against your Master Resume, and conditionally rewrites bullet points with Google's XYZ formula if gaps are detected.
+        </p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="tab-btn active" style="font-size: 11px; padding: 6px 12px;" onclick="copyWorkflowJson('btn-copy-full-flow')">
+          <span id="btn-copy-full-flow">📋 Copy Full Workflow JSON</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 1. Visual DAG Blueprint Diagram -->
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+        <h3 style="font-size: 13px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+          <span>⑂</span> Visual DAG Execution Topology
+        </h3>
+        <span class="badge" style="background: rgba(217, 119, 6, 0.12); color: var(--accent); border: 1px solid rgba(217, 119, 6, 0.3);">
+          6 Nodes · Conditional Branching · Dual Output Path
+        </span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- Top Linear Chain -->
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+          <div class="blueprint-node" style="border-left: 3px solid #6366f1;">
+            <div class="blueprint-node-tag" style="color: #6366f1;">TRIGGER</div>
+            <div class="blueprint-node-title">1. JD &amp; Resume Input</div>
+            <div class="blueprint-node-sub">ID: node_trigger_jd</div>
+          </div>
+          <div class="blueprint-arrow">➔</div>
+          <div class="blueprint-node" style="border-left: 3px solid #0ea5e9;">
+            <div class="blueprint-node-tag" style="color: #0ea5e9;">LLM EXTRACTOR</div>
+            <div class="blueprint-node-title">2. Parse Requirements</div>
+            <div class="blueprint-node-sub">ID: node_llm_extract</div>
+          </div>
+          <div class="blueprint-arrow">➔</div>
+          <div class="blueprint-node" style="border-left: 3px solid #8b5cf6;">
+            <div class="blueprint-node-tag" style="color: #8b5cf6;">LLM SCORER</div>
+            <div class="blueprint-node-title">3. Match Score &amp; Gaps</div>
+            <div class="blueprint-node-sub">ID: node_llm_score</div>
+          </div>
+          <div class="blueprint-arrow">➔</div>
+          <div class="blueprint-node" style="border-left: 3px solid #f59e0b;">
+            <div class="blueprint-node-tag" style="color: #f59e0b;">CONDITION GATE</div>
+            <div class="blueprint-node-title">4. Score &gt;= 80% ?</div>
+            <div class="blueprint-node-sub">ID: node_condition_gate</div>
+          </div>
+        </div>
+
+        <!-- Split Branch Paths -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px;">
+          <!-- True Branch: Exceptional Match -->
+          <div style="background: rgba(16, 185, 129, 0.04); border: 1px dashed rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 11px; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 6px;">
+                <span>✓ TRUE BRANCH (Score ≥ 80%)</span>
+              </span>
+              <span style="font-size: 10px; font-family: monospace; color: var(--text-tertiary);">Direct Path</span>
+            </div>
+            <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.4;">
+              Existing resume already qualifies strongly with all core keywords present. Skip rewrite, assemble direct application.
+            </p>
+            <div class="blueprint-node" style="border-left: 3px solid #10b981; width: 100%;">
+              <div class="blueprint-node-tag" style="color: #10b981;">OUTPUT</div>
+              <div class="blueprint-node-title">5a. Ready-to-Apply Package</div>
+              <div class="blueprint-node-sub">ID: node_output_pass</div>
+            </div>
+          </div>
+
+          <!-- False Branch: Needs Optimization -->
+          <div style="background: rgba(244, 63, 94, 0.04); border: 1px dashed rgba(244, 63, 94, 0.4); border-radius: 10px; padding: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 11px; font-weight: 700; color: #f43f5e; display: flex; align-items: center; gap: 6px;">
+                <span>✕ FALSE BRANCH (Score &lt; 80%)</span>
+              </span>
+              <span style="font-size: 10px; font-family: monospace; color: var(--text-tertiary);">Optimization Loop</span>
+            </div>
+            <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.4;">
+              Missing keywords or unaligned metrics detected. Rewrite bullets using Google's XYZ formula before exporting.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="blueprint-node" style="border-left: 3px solid #0ea5e9; width: 100%;">
+                <div class="blueprint-node-tag" style="color: #0ea5e9;">LLM REWRITER</div>
+                <div class="blueprint-node-title">5b. Google XYZ Formula Optimizer</div>
+                <div class="blueprint-node-sub">ID: node_llm_optimizer</div>
+              </div>
+              <div style="text-align: center; color: var(--text-tertiary); font-size: 10px;">⬇</div>
+              <div class="blueprint-node" style="border-left: 3px solid #10b981; width: 100%;">
+                <div class="blueprint-node-tag" style="color: #10b981;">OUTPUT</div>
+                <div class="blueprint-node-title">6. Tailored Resume &amp; Keyword Report</div>
+                <div class="blueprint-node-sub">ID: node_output_tailored</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Step-by-Step Hands-On Instructions -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+
+      <!-- STEP 1 -->
+      <div class="guide-step-card">
+        <div class="guide-step-header">
+          <div class="guide-step-num">1</div>
+          <div>
+            <h3 class="guide-step-title">Add the Trigger Node (Seed JD &amp; Master Resume)</h3>
+            <p class="guide-step-sub">Provide the raw input documents through the node's Context JSON configuration.</p>
+          </div>
+        </div>
+        <div class="guide-step-body">
+          <div class="spec-row">
+            <span class="spec-label">Node Type:</span>
+            <span class="spec-val"><span class="badge" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">Trigger Node</span></span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Custom Node ID:</span>
+            <span class="spec-val font-mono">node_trigger_jd</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Label:</span>
+            <span class="spec-val">Job Description &amp; Master Resume Input</span>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">Context Data (Paste into Inspector "Context JSON"):</span>
+              <button type="button" class="copy-btn" onclick="copySnippet('snippet-seed-json', this)">Copy JSON</button>
+            </div>
+            <pre class="code-block" id="snippet-seed-json">{
+  "job_description": "We are seeking a Senior Full-Stack Engineer with 4+ years building high-throughput web applications with React, TypeScript, Node.js, and PostgreSQL. Must have hands-on experience designing REST APIs, orchestrating Docker containers, and optimizing DB query latency. Bonus: Experience with AWS and Kafka event streaming.",
+  "master_resume": "Alex Mercer | Senior Software Engineer\n\nEXPERIENCE:\n• TechCorp (2021-Present): Built web applications using React and Node.js. Maintained PostgreSQL databases and resolved customer bug tickets.\n• CloudScale (2018-2021): Developed backend microservices in Express. Assisted in AWS cloud migration.\n\nSKILLS: JavaScript, TypeScript, React, Node.js, Express, PostgreSQL, Git, Linux."
+}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="guide-step-card">
+        <div class="guide-step-header">
+          <div class="guide-step-num">2</div>
+          <div>
+            <h3 class="guide-step-title">Add LLM Node 1: JD Extractor &amp; Requirement Parser</h3>
+            <p class="guide-step-sub">Parses unstructured Job Description text into structured JSON containing must-have skills, keywords, and seniority.</p>
+          </div>
+        </div>
+        <div class="guide-step-body">
+          <div class="spec-row">
+            <span class="spec-label">Node Type:</span>
+            <span class="spec-val"><span class="badge" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">LLM Node</span></span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Custom Node ID:</span>
+            <span class="spec-val font-mono">node_llm_extract</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Model:</span>
+            <span class="spec-val font-mono">gpt-4o (Temperature: 0.2)</span>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">System Prompt:</span>
+              <button type="button" class="copy-btn" onclick="copySnippet('snippet-llm1-sys', this)">Copy Prompt</button>
+            </div>
+            <pre class="code-block" id="snippet-llm1-sys">You are an expert Technical Recruiter and ATS parser. Extract key job requirements into strict JSON format with fields: required_skills (array), preferred_skills (array), key_technologies (array), minimum_years_experience (number), and role_summary (string).</pre>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">User Prompt Template:</span>
+              <button type="button" class="copy-btn" onclick="copySnippet('snippet-llm1-user', this)">Copy Template</button>
+            </div>
+            <pre class="code-block" id="snippet-llm1-user">Extract and categorize all requirements from this Job Description:
+
+{{node_trigger_jd.context.job_description}}
+
+Output ONLY a JSON object.</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="guide-step-card">
+        <div class="guide-step-header">
+          <div class="guide-step-num">3</div>
+          <div>
+            <h3 class="guide-step-title">Add LLM Node 2: ATS Match Scorer &amp; Gap Analyzer</h3>
+            <p class="guide-step-sub">Compares Master Resume against extracted requirements, outputting a numerical score (0-100) and missing skills list.</p>
+          </div>
+        </div>
+        <div class="guide-step-body">
+          <div class="spec-row">
+            <span class="spec-label">Node Type:</span>
+            <span class="spec-val"><span class="badge" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">LLM Node</span></span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Custom Node ID:</span>
+            <span class="spec-val font-mono">node_llm_score</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Model:</span>
+            <span class="spec-val font-mono">gpt-4o (Temperature: 0.1)</span>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">System Prompt:</span>
+              <button type="button" class="copy-btn" onclick="copySnippet('snippet-llm2-sys', this)">Copy Prompt</button>
+            </div>
+            <pre class="code-block" id="snippet-llm2-sys">You are an ATS Scoring Engine. Evaluate the candidate's resume against job requirements.
+Return JSON with EXACT keys:
+- match_score: integer from 0 to 100
+- matched_skills: array of string skill matches
+- missing_skills: array of string gaps or keywords not explicitly emphasized
+- gap_analysis: concise paragraph explaining the score</pre>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">User Prompt Template:</span>
+              <button type="button" class="copy-btn" onclick="copySnippet('snippet-llm2-user', this)">Copy Template</button>
+            </div>
+            <pre class="code-block" id="snippet-llm2-user">Evaluate Candidate Resume:
+{{node_trigger_jd.context.master_resume}}
+
+Against Job Requirements:
+{{node_llm_extract.output}}
+
+Output strict JSON only.</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="guide-step-card">
+        <div class="guide-step-header">
+          <div class="guide-step-num">4</div>
+          <div>
+            <h3 class="guide-step-title">Add the Condition Node: 80% Match Threshold Gate</h3>
+            <p class="guide-step-sub">Controls workflow routing based on the evaluated match_score.</p>
+          </div>
+        </div>
+        <div class="guide-step-body">
+          <div class="spec-row">
+            <span class="spec-label">Node Type:</span>
+            <span class="spec-val"><span class="badge" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">Condition Node</span></span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Custom Node ID:</span>
+            <span class="spec-val font-mono">node_condition_gate</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Target Variable:</span>
+            <span class="spec-val font-mono">{{node_llm_score.match_score}}</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Comparison Operator:</span>
+            <span class="spec-val font-mono">&gt;= (Greater Than or Equal)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Target Value:</span>
+            <span class="spec-val font-mono">80</span>
+          </div>
+
+          <div style="margin-top: 12px; padding: 10px; background: var(--bg-surface-subtle); border-radius: 8px; border: 1px solid var(--border-color);">
+            <div style="font-size: 11px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Handle Connection Instructions:</div>
+            <ul style="font-size: 11px; color: var(--text-secondary); margin-left: 16px; line-height: 1.5;">
+              <li>Connect the <strong style="color: #10b981;">Green "True" Handle</strong> on the right to <span class="font-mono">node_output_pass</span>.</li>
+              <li>Connect the <strong style="color: #f43f5e;">Red "False" Handle</strong> on the right to <span class="font-mono">node_llm_optimizer</span>.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="guide-step-card">
+        <div class="guide-step-header">
+          <div class="guide-step-num">5</div>
+          <div>
+            <h3 class="guide-step-title">Add LLM Node 3: Google XYZ Formula Resume Optimizer</h3>
+            <p class="guide-step-sub">Activated only when score &lt; 80%. Rewrites bullet points to highlight missing ATS keywords using quantifiable impact statements.</p>
+          </div>
+        </div>
+        <div class="guide-step-body">
+          <div class="spec-row">
+            <span class="spec-label">Node Type:</span>
+            <span class="spec-val"><span class="badge" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">LLM Node</span></span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Custom Node ID:</span>
+            <span class="spec-val font-mono">node_llm_optimizer</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Model:</span>
+            <span class="spec-val font-mono">claude-3-5-sonnet-20241022 or gpt-4o (Temperature: 0.4)</span>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">System Prompt:</span>
+              <button type="button" class="copy-btn" onclick="copySnippet('snippet-llm3-sys', this)">Copy Prompt</button>
+            </div>
+            <pre class="code-block" id="snippet-llm3-sys">You are an elite Executive Tech Resume Strategist. Rewrite the candidate's bullet points strictly applying Google's XYZ formula: "Accomplished [X] as measured by [Y], by doing [Z]".
+Naturally integrate the missing keywords and technical requirements from the JD into the candidate's actual experience without fabricating employment history. Preserve clean Markdown formatting.</pre>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">User Prompt Template:</span>
+              <button type="button" class="copy-btn" onclick="copySnippet('snippet-llm3-user', this)">Copy Template</button>
+            </div>
+            <pre class="code-block" id="snippet-llm3-user">Original Resume:
+{{node_trigger_jd.context.master_resume}}
+
+Target Job Requirements:
+{{node_llm_extract.output}}
+
+Missing Keywords to Weave In:
+{{node_llm_score.missing_skills}}
+
+Generate an ATS-optimized, tailored Markdown resume emphasizing quantifiable engineering impact.</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div class="guide-step-card">
+        <div class="guide-step-header">
+          <div class="guide-step-num">6</div>
+          <div>
+            <h3 class="guide-step-title">Add the Output Destination Nodes</h3>
+            <p class="guide-step-sub">Collect and display the resulting application packages for each branch path.</p>
+          </div>
+        </div>
+        <div class="guide-step-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="background: var(--bg-surface-subtle); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="font-size: 11px; font-weight: 700; color: #10b981; margin-bottom: 4px;">Node ID: node_output_pass</div>
+              <div style="font-size: 10px; color: var(--text-tertiary); margin-bottom: 6px;">Connected to: True Handle</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Template:</div>
+              <pre class="code-block font-mono" style="font-size: 10px;"># Direct Match Application Package (Score: {{node_llm_score.match_score}}%)
+
+## Summary Analysis
+{{node_llm_score.gap_analysis}}
+
+## Master Resume (Unchanged)
+{{node_trigger_jd.context.master_resume}}</pre>
+            </div>
+
+            <div style="background: var(--bg-surface-subtle); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="font-size: 11px; font-weight: 700; color: #0ea5e9; margin-bottom: 4px;">Node ID: node_output_tailored</div>
+              <div style="font-size: 10px; color: var(--text-tertiary); margin-bottom: 6px;">Connected to: node_llm_optimizer</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Template:</div>
+              <pre class="code-block font-mono" style="font-size: 10px;"># Tailored ATS-Optimized Resume
+
+## Initial Evaluation
+- **Original Match Score:** {{node_llm_score.match_score}}%
+- **Target Keywords Integrated:** {{node_llm_score.missing_skills}}
+
+---
+
+{{node_llm_optimizer.output}}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 3. Interactive Testing Simulator -->
+    <div style="margin-top: 32px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <div>
+          <h3 style="font-size: 14px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+            <span>▶</span> Live DAG Simulation Sandbox
+          </h3>
+          <p style="font-size: 11px; color: var(--text-secondary);">
+            Select a test case to witness Kahn's algorithm dynamically evaluate, branch, or optimize in real-time.
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <select id="resume-sim-scenario" class="select-field" style="font-size: 11px; padding: 6px 10px; background: var(--bg-surface-subtle); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px;" onchange="updateResumeSimScenario()">
+            <option value="gap">Scenario A: Skill Gap Detected (Score 64% ➔ Optimizes)</option>
+            <option value="pass">Scenario B: Direct High Match (Score 92% ➔ Direct Pass)</option>
+          </select>
+          <button type="button" id="resume-sim-btn" class="tab-btn active" style="font-size: 11px; padding: 6px 14px;" onclick="runResumeMatcherSimulation()">
+            Run Matcher Flow
+          </button>
+        </div>
+      </div>
+
+      <!-- Simulator Visual Flow Strip -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding: 12px; background: var(--bg-surface-subtle); border-radius: 8px; border: 1px solid var(--border-color);">
+        <div class="sim-pill" id="rsim-node-1">1. Trigger</div>
+        <span style="color: var(--text-tertiary); font-size: 10px;">➔</span>
+        <div class="sim-pill" id="rsim-node-2">2. LLM Extract</div>
+        <span style="color: var(--text-tertiary); font-size: 10px;">➔</span>
+        <div class="sim-pill" id="rsim-node-3">3. LLM Score</div>
+        <span style="color: var(--text-tertiary); font-size: 10px;">➔</span>
+        <div class="sim-pill" id="rsim-node-4">4. Gate (≥80?)</div>
+        <span style="color: var(--text-tertiary); font-size: 10px;">➔</span>
+        <div class="sim-pill" id="rsim-node-5b" style="border-style: dashed;">5b. Optimizer</div>
+        <span style="color: var(--text-tertiary); font-size: 10px;">➔</span>
+        <div class="sim-pill" id="rsim-node-6">6. Output</div>
+      </div>
+
+      <!-- Execution Logs & Output Preview -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+          <div style="font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">Kahn Engine Trace:</div>
+          <pre class="code-block font-mono" id="rsim-terminal" style="height: 180px; font-size: 11px; margin: 0; line-height: 1.4; color: var(--accent);">[Idle] Click "Run Matcher Flow" to start live execution simulation...</pre>
+        </div>
+        <div>
+          <div style="font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">Generated Output Result:</div>
+          <div id="rsim-preview" style="height: 180px; overflow-y: auto; background: var(--bg-surface-subtle); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-size: 11px; color: var(--text-primary); line-height: 1.4;">
+            <p style="color: var(--text-tertiary); font-style: italic;">Application package will render here upon workflow completion.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- SECTION 2: INTERACTIVE SIMULATOR -->
+  <section class="section-card" id="sec-simulator" style="display: none;">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Interactive DAG Execution Simulator</h2>
+        <p class="section-desc">Test real-time sequential Kahn's algorithm execution and conditional branching</p>
+      </div>
+    </div>
+
+    <div class="simulator-box">
+      <div class="sim-canvas">
+        <div class="sim-node" id="sim-node-1" onclick="showSimNodeInfo(1)">
+          <div class="sim-node-header">
+            <span class="sim-node-tag tag-trigger">Trigger</span>
+            <span id="sim-status-1" style="font-size: 10px; color: var(--text-tertiary);">Ready</span>
+          </div>
+          <div class="sim-node-title">Inbound Ticket</div>
+          <div class="sim-node-body">"DB is failing..."</div>
+        </div>
+
+        <div class="sim-arrow">➔</div>
+
+        <div class="sim-node" id="sim-node-2" onclick="showSimNodeInfo(2)">
+          <div class="sim-node-header">
+            <span class="sim-node-tag tag-llm">LLM Agent</span>
+            <span id="sim-status-2" style="font-size: 10px; color: var(--text-tertiary);">Ready</span>
+          </div>
+          <div class="sim-node-title">Sentiment Classifier</div>
+          <div class="sim-node-body">gpt-4o • temp: 0.2</div>
+        </div>
+
+        <div class="sim-arrow">➔</div>
+
+        <div class="sim-node" id="sim-node-3" onclick="showSimNodeInfo(3)">
+          <div class="sim-node-header">
+            <span class="sim-node-tag tag-condition">Condition</span>
+            <span id="sim-status-3" style="font-size: 10px; color: var(--text-tertiary);">Ready</span>
+          </div>
+          <div class="sim-node-title">Is High Urgency?</div>
+          <div class="sim-node-body">urgency == "high"</div>
+        </div>
+
+        <div class="sim-arrow" style="color: var(--color-success);">➔ (True)</div>
+
+        <div class="sim-node" id="sim-node-4" onclick="showSimNodeInfo(4)">
+          <div class="sim-node-header">
+            <span class="sim-node-tag tag-output">Output</span>
+            <span id="sim-status-4" style="font-size: 10px; color: var(--text-tertiary);">Ready</span>
+          </div>
+          <div class="sim-node-title">Priority Escalation</div>
+          <div class="sim-node-body">Markdown Terminal</div>
+        </div>
+      </div>
+
+      <div class="sim-controls">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button class="btn btn-primary" id="sim-run-btn" onclick="runSimWorkflow()">▶ Run Simulated Workflow</button>
+          <button class="btn btn-secondary" onclick="resetSimWorkflow()">↺ Reset</button>
+        </div>
+        <div id="sim-log-text" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);">
+          Status: Ready to execute DAG
+        </div>
+      </div>
+
+      <div class="output-preview-box" id="sim-terminal-output">Click "Run Simulated Workflow" to trace data propagation across nodes...</div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: NODE CATALOG -->
+  <section class="section-card" id="sec-nodes" style="display: none;">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">The 6 Core Building Blocks</h2>
+        <p class="section-desc">Detailed capabilities, inputs, outputs, and variable references for each node</p>
+      </div>
+    </div>
+
+    <div class="nodes-grid">
+      <!-- Node 1 -->
+      <div class="node-item-card">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-trigger">⚡</div>
+          <div>
+            <div class="node-card-name">Manual Trigger</div>
+            <div class="node-card-category">Category: Entrypoint</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Initiates workflow execution. Supports interactive seed prompts, seed context JSON payloads, or mock webhook payloads.
+        </p>
+        <div class="node-syntax-badge">
+          <span>Downstream Variable:</span>
+          <code>&#123;&#123;node_id.output&#125;&#125;</code>
+        </div>
+      </div>
+
+      <!-- Node 2 -->
+      <div class="node-item-card">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-llm">✦</div>
+          <div>
+            <div class="node-card-name">LLM Agent</div>
+            <div class="node-card-category">Category: AI Inference</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Executes prompts with Claude 3.7 / 3.5 Sonnet, GPT-4o, Gemini 2.0, Groq, Ollama, or local zero-cost simulated models.
+        </p>
+        <div class="node-syntax-badge">
+          <span>Downstream Variable:</span>
+          <code>&#123;&#123;node_id.output&#125;&#125;</code>
+        </div>
+      </div>
+
+      <!-- Node 3 -->
+      <div class="node-item-card">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-condition">⑂</div>
+          <div>
+            <div class="node-card-name">Condition (IF/ELSE)</div>
+            <div class="node-card-category">Category: Logic &amp; Routing</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Evaluates multi-rule conditions (AND / OR) comparing upstream variables against strings or numbers to branch into True / False paths.
+        </p>
+        <div class="node-syntax-badge">
+          <span>Branch Outputs:</span>
+          <code>True (Green) / False (Red)</code>
+        </div>
+      </div>
+
+      <!-- Node 4 -->
+      <div class="node-item-card">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-transform">⚙</div>
+          <div>
+            <div class="node-card-name">JS Transform</div>
+            <div class="node-card-category">Category: Data Transform</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Runs sandboxed JavaScript (with access to <code>inputs</code>) to parse, filter, aggregate, or reshape data before the next step.
+        </p>
+        <div class="node-syntax-badge">
+          <span>Downstream Variable:</span>
+          <code>&#123;&#123;node_id.output.key&#125;&#125;</code>
+        </div>
+      </div>
+
+      <!-- Node 5 -->
+      <div class="node-item-card">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-http">🌐</div>
+          <div>
+            <div class="node-card-name">HTTP Request</div>
+            <div class="node-card-category">Category: Integration</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Makes authenticated REST API or webhook requests (GET, POST, PUT, DELETE) with variable interpolation in URLs, headers, and request bodies.
+        </p>
+        <div class="node-syntax-badge">
+          <span>Downstream Variable:</span>
+          <code>&#123;&#123;node_id.output.data&#125;&#125;</code>
+        </div>
+      </div>
+
+      <!-- Node 6 -->
+      <div class="node-item-card">
+        <div class="node-card-top">
+          <div class="node-icon-box icon-output">▤</div>
+          <div>
+            <div class="node-card-name">Output Terminal</div>
+            <div class="node-card-category">Category: Viewer</div>
+          </div>
+        </div>
+        <p class="node-card-desc">
+          Terminal endpoint for inspecting final responses with support for formatted Markdown, JSON code views, or tabular execution results.
+        </p>
+        <div class="node-syntax-badge">
+          <span>Format Modes:</span>
+          <code>Markdown / JSON / Text</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: VARIABLE PLAYGROUND -->
+  <section class="section-card" id="sec-variables" style="display: none;">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Variable Interpolation Playground</h2>
+        <p class="section-desc">Type template text and click variable tags to test live runtime interpolation</p>
+      </div>
+    </div>
+
+    <div class="playground-box">
+      <div>
+        <div class="input-label" style="margin-bottom: 8px;">Available Upstream Variables (Click to insert):</div>
+        <div class="chip-row">
+          <span class="var-chip" onclick="insertTag('{{node_trigger_1.output}}')">+ {{node_trigger_1.output}}</span>
+          <span class="var-chip" onclick="insertTag('{{node_llm_triage.output}}')">+ {{node_llm_triage.output}}</span>
+          <span class="var-chip" onclick="insertTag('{{node_llm_triage.sentiment}}')">+ {{node_llm_triage.sentiment}}</span>
+          <span class="var-chip" onclick="insertTag('{{trigger.context.user_id}}')">+ {{trigger.context.user_id}}</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="input-label" style="margin-bottom: 8px;">Prompt / Template Input:</div>
+        <textarea class="interactive-textarea" id="templateInput" oninput="resolveVariables()">Hello Customer Support! We received ticket #{{trigger.context.user_id}}: "{{node_trigger_1.output}}". The AI classified this as: {{node_llm_triage.output}}</textarea>
+      </div>
+
+      <div>
+        <div class="input-label" style="margin-bottom: 8px;">Resolved Runtime Output:</div>
+        <div class="output-preview-box" id="resolvedOutput"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: STEP-BY-STEP TUTORIAL -->
+  <section class="section-card" id="sec-tutorial" style="display: none;">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Build Your First Workflow in 5 Steps</h2>
+        <p class="section-desc">Follow this guide to create a Ticket Triage pipeline from scratch</p>
+      </div>
+    </div>
+
+    <div class="tutorial-list">
+      <div class="tutorial-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Clear or Initialize the Canvas</div>
+          <div class="step-text">Click the Trash icon in the header toolbar to start with a blank slate, or click "Templates" to explore ready-made architectures.</div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Drag a Manual Trigger Node</div>
+          <div class="step-text">From the left sidebar, drag "Manual Trigger" onto the canvas. Click it to set the seed prompt in the Property Inspector.</div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Add &amp; Connect an LLM Agent Node</div>
+          <div class="step-text">Drag an "LLM Agent" node. Click the trigger's right circle handle and drag a connection wire to the LLM node's left circle handle.</div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Configure Prompts with Upstream Variables</div>
+          <div class="step-text">In the LLM prompt, type <code>Analyze this customer message: &#123;&#123;node_trigger_1.output&#125;&#125;</code> using the clickable variable chips.</div>
+        </div>
+      </div>
+
+      <div class="tutorial-step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Attach an Output Terminal &amp; Click "Run Workflow"</div>
+          <div class="step-text">Connect the LLM output to an Output Terminal. Verify the green "DAG Valid" badge and click the blue "Run Workflow" button to watch it execute!</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 6: CHEATSHEET -->
+  <section class="section-card" id="sec-shortcuts" style="display: none;">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Canvas Shortcuts &amp; Best Practices</h2>
+        <p class="section-desc">Quick reference for shortcuts, DAG rules, and engine features</p>
+      </div>
+    </div>
+
+    <table class="shortcut-table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Shortcut / Interaction</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Pan Canvas</strong></td>
+          <td><span class="kbd">Space</span> + Drag or Drag Background</td>
+          <td>Move smoothly across the infinite canvas workspace.</td>
+        </tr>
+        <tr>
+          <td><strong>Zoom In / Out</strong></td>
+          <td><span class="kbd">Scroll Wheel</span> or <span class="kbd">+</span> / <span class="kbd">-</span> HUD buttons</td>
+          <td>Zoom level displays dynamically in the floating Canvas HUD.</td>
+        </tr>
+        <tr>
+          <td><strong>Fit View</strong></td>
+          <td>Click <span class="kbd">Fit View</span> on HUD</td>
+          <td>Instantly centers and frames all pipeline nodes on screen.</td>
+        </tr>
+        <tr>
+          <td><strong>Delete Node / Wire</strong></td>
+          <td><span class="kbd">Backspace</span> or <span class="kbd">Delete</span></td>
+          <td>Removes the selected node or connection edge.</td>
+        </tr>
+        <tr>
+          <td><strong>Duplicate Node</strong></td>
+          <td>Click <span class="kbd">Duplicate</span> icon on Node Card</td>
+          <td>Clones the node with its configurations and parameters.</td>
+        </tr>
+        <tr>
+          <td><strong>Toggle Theme</strong></td>
+          <td>Click <span class="kbd">☼ / ☾</span> in Header</td>
+          <td>Instantly switches between Tactile Soft-Clay Light &amp; Linear Dark themes.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<script>
+  // Navigation Tabs Switching
+  function switchSection(sectionId) {
+    const sections = ['overview', 'resume-guide', 'simulator', 'nodes', 'variables', 'tutorial', 'shortcuts'];
+    const tabButtons = document.querySelectorAll('.tab-btn');
+
+    sections.forEach((sec) => {
+      const el = document.getElementById('sec-' + sec);
+      if (el) {
+        el.style.display = (sec === sectionId) ? 'flex' : 'none';
+      }
+    });
+
+    const tabMatch = {
+      'overview': 'Overview',
+      'resume-guide': 'Resume',
+      'simulator': 'Simulator',
+      'nodes': 'Node Catalog',
+      'variables': 'Variable',
+      'tutorial': 'Tutorial',
+      'shortcuts': 'Cheatsheet'
+    };
+    tabButtons.forEach((btn) => {
+      const match = tabMatch[sectionId];
+      if (match && btn.textContent.includes(match)) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
+
+  // Interactive Variable Resolver Playground
+  const mockVariableData = {
+    '{{node_trigger_1.output}}': 'URGENT: Database connection failure in US-East-1 production cluster.',
+    '{{node_llm_triage.output}}': '{"sentiment": "negative", "urgency": "high", "category": "database_outage"}',
+    '{{node_llm_triage.sentiment}}': 'negative',
+    '{{trigger.context.user_id}}': 'USR-8942'
+  };
+
+  function resolveVariables() {
+    const input = document.getElementById('templateInput');
+    const output = document.getElementById('resolvedOutput');
+    if (!input || !output) return;
+
+    let text = input.value;
+    for (const [key, val] of Object.entries(mockVariableData)) {
+      text = text.replaceAll(key, val);
+    }
+    output.textContent = text;
+  }
+
+  function insertTag(tag) {
+    const input = document.getElementById('templateInput');
+    if (!input) return;
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    input.value = input.value.substring(0, start) + ' ' + tag + ' ' + input.value.substring(end);
+    resolveVariables();
+    input.focus();
+  }
+
+  // Simulator Workflow Execution
+  let isSimRunning = false;
+  async function runSimWorkflow() {
+    if (isSimRunning) return;
+    isSimRunning = true;
+
+    const runBtn = document.getElementById('sim-run-btn');
+    const logText = document.getElementById('sim-log-text');
+    const terminal = document.getElementById('sim-terminal-output');
+
+    if (runBtn) runBtn.disabled = true;
+
+    // Reset visual nodes
+    for (let i = 1; i <= 4; i++) {
+      const node = document.getElementById(`sim-node-${i}`);
+      const status = document.getElementById(`sim-status-${i}`);
+      if (node) { node.classList.remove('active-step', 'completed-step'); }
+      if (status) { status.textContent = 'Waiting'; status.style.color = 'var(--text-tertiary)'; }
+    }
+
+    terminal.textContent = 'Starting DAG Execution...\n';
+
+    // Step 1: Trigger
+    highlightStep(1, 'Executing Trigger...');
+    terminal.textContent += '[00:00.010] [Trigger] Inbound payload loaded: "DB is failing..."\n';
+    await delay(600);
+    finishStep(1, '31ms');
+
+    // Step 2: LLM
+    highlightStep(2, 'Executing LLM Agent (gpt-4o)...');
+    terminal.textContent += '[00:00.550] [LLM] Analyzing sentiment & urgency with gpt-4o...\n';
+    await delay(900);
+    finishStep(2, '546ms');
+
+    // Step 3: Condition
+    highlightStep(3, 'Evaluating Boolean Condition...');
+    terminal.textContent += '[00:00.575] [Condition] Rule check: urgency == "high" -> TRUE\n';
+    await delay(600);
+    finishStep(3, '23ms');
+
+    // Step 4: Output
+    highlightStep(4, 'Formatting Markdown Output...');
+    terminal.textContent += '[00:00.590] [Output] Escalation Action triggered for On-Call Engineer!\n\n';
+    terminal.textContent += '===================================================\n';
+    terminal.textContent += 'FINAL OUTPUT (MARKDOWN):\n';
+    terminal.textContent += '🚨 HIGH PRIORITY ESCALATION NOTICE\n';
+    terminal.textContent += 'Ticket: Database outage reported\n';
+    terminal.textContent += 'Assigned: Tier-3 Reliability Engineering On-Call\n';
+    terminal.textContent += '===================================================';
+    await delay(400);
+    finishStep(4, '15ms');
+
+    if (logText) {
+      logText.innerHTML = '<span style="color: var(--color-success); font-weight: 700;">✓ DAG Run Completed in 1.18s (424 tokens)</span>';
+    }
+
+    if (runBtn) runBtn.disabled = false;
+    isSimRunning = false;
+  }
+
+  function highlightStep(stepNum, message) {
+    const node = document.getElementById(`sim-node-${stepNum}`);
+    const status = document.getElementById(`sim-status-${stepNum}`);
+    const logText = document.getElementById(`sim-log-text`);
+    if (node) { node.classList.add('active-step'); }
+    if (status) { status.textContent = 'Running...'; status.style.color = 'var(--accent)'; }
+    if (logText) { logText.textContent = message; }
+  }
+
+  function finishStep(stepNum, duration) {
+    const node = document.getElementById(`sim-node-${stepNum}`);
+    const status = document.getElementById(`sim-status-${stepNum}`);
+    if (node) {
+      node.classList.remove('active-step');
+      node.classList.add('completed-step');
+    }
+    if (status) {
+      status.textContent = duration;
+      status.style.color = 'var(--color-success)';
+    }
+  }
+
+  function resetSimWorkflow() {
+    for (let i = 1; i <= 4; i++) {
+      const node = document.getElementById(`sim-node-${i}`);
+      const status = document.getElementById(`sim-status-${i}`);
+      if (node) { node.classList.remove('active-step', 'completed-step'); }
+      if (status) { status.textContent = 'Ready'; status.style.color = 'var(--text-tertiary)'; }
+    }
+    const logText = document.getElementById('sim-log-text');
+    const terminal = document.getElementById('sim-terminal-output');
+    if (logText) logText.textContent = 'Status: Ready to execute DAG';
+    if (terminal) terminal.textContent = 'Click "Run Simulated Workflow" to trace data propagation across nodes...';
+  }
+
+  function delay(ms) {
+    return new Promise(res => setTimeout(res, ms));
+  }
+
+  // --- Copy Snippet to Clipboard ---
+  function copySnippet(elementId, btn) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const text = el.textContent || '';
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.style.color = 'var(--color-success)';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
+    }).catch(() => {
+      btn.textContent = 'Failed';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    });
+  }
+
+  // --- Copy Full Workflow JSON ---
+  function copyWorkflowJson(btnId) {
+    const btn = document.getElementById(btnId);
+    // Gather all <pre> blocks inside the resume-guide section that look like JSON
+    const section = document.getElementById('sec-resume-guide');
+    if (!section) return;
+    const pres = section.querySelectorAll('pre');
+    let fullJson = '';
+    pres.forEach(pre => {
+      const t = pre.textContent.trim();
+      if (t.startsWith('{') || t.startsWith('[')) fullJson += t + '\n';
+    });
+    if (!fullJson) fullJson = '// No JSON blocks found';
+    navigator.clipboard.writeText(fullJson.trim()).then(() => {
+      if (btn) { const o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = o, 1500); }
+    }).catch(() => {
+      if (btn) { btn.textContent = 'Failed'; setTimeout(() => btn.textContent = 'Copy Full JSON', 1500); }
+    });
+  }
+
+  // --- Resume Matcher Simulation ---
+  const resumeScenarios = {
+    gap: {
+      label: 'Career Gap (Score 64%)',
+      score: 64,
+      pass: false,
+      seedData: { name: 'Alex Rivera', role: 'Frontend Engineer', gap: '6-month career gap in 2023' },
+      extractedSkills: ['React', 'TypeScript', 'CSS', 'REST APIs'],
+      jdRequirements: ['React', 'TypeScript', 'GraphQL', 'CI/CD', 'Design Systems'],
+      optimizerOutput: 'Added quantified open-source contributions during gap period using XYZ formula'
+    },
+    pass: {
+      label: 'Strong Match (Score 92%)',
+      score: 92,
+      pass: true,
+      seedData: { name: 'Jordan Chen', role: 'Senior Backend Engineer', gap: 'none' },
+      extractedSkills: ['Go', 'Kubernetes', 'PostgreSQL', 'gRPC', 'Terraform'],
+      jdRequirements: ['Go', 'Kubernetes', 'PostgreSQL', 'gRPC', 'AWS'],
+      optimizerOutput: null
+    }
+  };
+
+  let currentScenario = 'gap';
+
+  function updateResumeSimScenario() {
+    const sel = document.getElementById('resume-sim-scenario');
+    if (sel) currentScenario = sel.value;
+    resetResumeMatcherSim();
+  }
+
+  function resetResumeMatcherSim() {
+    // Reset all node pills
+    for (let i = 1; i <= 6; i++) {
+      const pill = document.getElementById('rsim-node-' + i);
+      if (pill) { pill.className = pill.className.replace(/rsim-active|rsim-done|rsim-skip/g, '').trim(); }
+    }
+    const pill5b = document.getElementById('rsim-node-5b');
+    if (pill5b) pill5b.className = pill5b.className.replace(/rsim-active|rsim-done|rsim-skip/g, '').trim();
+
+    const terminal = document.getElementById('rsim-terminal');
+    if (terminal) terminal.textContent = 'Select a scenario and click "Run Simulation" to trace the 6-node DAG...';
+    const preview = document.getElementById('rsim-preview');
+    if (preview) preview.textContent = '';
+    const btn = document.getElementById('resume-sim-btn');
+    if (btn) btn.disabled = false;
+  }
+
+  async function runResumeMatcherSimulation() {
+    const btn = document.getElementById('resume-sim-btn');
+    if (btn) btn.disabled = true;
+    resetResumeMatcherSim();
+    await delay(200);
+
+    const sc = resumeScenarios[currentScenario];
+    const terminal = document.getElementById('rsim-terminal');
+    const preview = document.getElementById('rsim-preview');
+    function log(msg) { if (terminal) terminal.textContent += '\n' + msg; }
+    if (terminal) terminal.textContent = '▶ Starting DAG Execution — Kahn\'s Topological Sort';
+
+    // Step 1: Trigger Node — Seed Data
+    setPill('rsim-node-1', 'rsim-active');
+    log('┌─ Node 1: Trigger (Seed Data)');
+    log('│  Injecting: ' + JSON.stringify(sc.seedData));
+    await delay(600);
+    setPill('rsim-node-1', 'rsim-done');
+    log('└─ ✓ Done (12ms)');
+
+    // Step 2: LLM Extractor
+    setPill('rsim-node-2', 'rsim-active');
+    log('┌─ Node 2: LLM — Extract Skills');
+    log('│  Prompt: "Extract skills from resume and JD requirements"');
+    await delay(900);
+    log('│  Extracted: [' + sc.extractedSkills.join(', ') + ']');
+    log('│  JD Needs:  [' + sc.jdRequirements.join(', ') + ']');
+    setPill('rsim-node-2', 'rsim-done');
+    log('└─ ✓ Done (340ms)');
+
+    // Step 3: LLM ATS Scorer
+    setPill('rsim-node-3', 'rsim-active');
+    log('┌─ Node 3: LLM — ATS Score');
+    log('│  Computing match score...');
+    await delay(800);
+    log('│  Score: ' + sc.score + '%');
+    setPill('rsim-node-3', 'rsim-done');
+    log('└─ ✓ Done (280ms)');
+
+    // Step 4: Condition — Threshold Check
+    setPill('rsim-node-4', 'rsim-active');
+    log('┌─ Node 4: Condition (score ≥ 80%)');
+    log('│  Evaluating: ' + sc.score + ' >= 80 → ' + (sc.pass ? 'TRUE' : 'FALSE'));
+    await delay(500);
+    setPill('rsim-node-4', 'rsim-done');
+
+    if (sc.pass) {
+      // TRUE branch → Output directly
+      log('└─ ✓ Branch: TRUE → Node 6 (Output)');
+      setPill('rsim-node-5b', 'rsim-skip');
+      log('   ⊘ Node 5: LLM Optimizer — SKIPPED (score above threshold)');
+
+      setPill('rsim-node-6', 'rsim-active');
+      log('┌─ Node 6: Output (Tailored Resume)');
+      await delay(500);
+      setPill('rsim-node-6', 'rsim-done');
+      log('└─ ✓ Done (8ms)');
+
+      if (preview) preview.textContent = '✅ Resume passed ATS threshold (' + sc.score + '%).\nNo optimization needed — direct output.\n\nCandidate: ' + sc.seedData.name + '\nRole: ' + sc.seedData.role + '\nMatched Skills: ' + sc.extractedSkills.join(', ');
+    } else {
+      // FALSE branch → Optimizer → Output
+      log('└─ ✓ Branch: FALSE → Node 5 (Optimizer)');
+
+      setPill('rsim-node-5b', 'rsim-active');
+      log('┌─ Node 5: LLM — Resume Optimizer (XYZ Formula)');
+      log('│  Applying Google XYZ formula to strengthen weak areas...');
+      await delay(1100);
+      log('│  ' + sc.optimizerOutput);
+      setPill('rsim-node-5b', 'rsim-done');
+      log('└─ ✓ Done (520ms)');
+
+      setPill('rsim-node-6', 'rsim-active');
+      log('┌─ Node 6: Output (Tailored Resume)');
+      await delay(400);
+      setPill('rsim-node-6', 'rsim-done');
+      log('└─ ✓ Done (8ms)');
+
+      if (preview) preview.textContent = '⚠️ Resume scored ' + sc.score + '% — below 80% threshold.\nOptimizer rewrote weak sections using XYZ formula.\n\n' + sc.optimizerOutput + '\n\nCandidate: ' + sc.seedData.name + '\nRole: ' + sc.seedData.role;
+    }
+
+    log('\n══════════════════════════════════');
+    log('DAG Complete — All nodes resolved.');
+    if (btn) btn.disabled = false;
+  }
+
+  function setPill(id, cls) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = el.className.replace(/rsim-active|rsim-done|rsim-skip/g, '').trim();
+    if (cls) el.className += ' ' + cls;
+  }
+
+  // --- Dual-Theme State Management & Toggling ---
+  const THEME_STORAGE_KEY = 'ai-flow-builder-theme';
+
+  function getSavedTheme() {
+    try {
+      return localStorage.getItem(THEME_STORAGE_KEY);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function getSystemTheme() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function updateThemeToggleUI(theme) {
+    const icon = document.getElementById('theme-toggle-icon');
+    const text = document.getElementById('theme-toggle-text');
+    if (theme === 'light') {
+      if (icon) icon.textContent = '🌙';
+      if (text) text.textContent = 'Dark Mode';
+    } else {
+      if (icon) icon.textContent = '☀️';
+      if (text) text.textContent = 'Light Mode';
+    }
+  }
+
+  function setGuideTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch (e) {}
+    updateThemeToggleUI(theme);
+  }
+
+  function toggleGuideTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || (getSystemTheme() === 'dark' ? 'dark' : 'light');
+    const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+    setGuideTheme(nextTheme);
+  }
+
+  function initTheme() {
+    const saved = getSavedTheme();
+    const initialTheme = saved || getSystemTheme();
+    setGuideTheme(initialTheme);
+
+    // Listen for OS theme changes if user hasn't explicitly set preference
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!getSavedTheme()) {
+          setGuideTheme(e.matches ? 'dark' : 'light');
+        }
+      });
+    }
+  }
+
+  // Initialize immediately to prevent flash and on DOM ready
+  initTheme();
+  document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    resolveVariables();
+  });
+</script>
