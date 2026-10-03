@@ -41,6 +41,8 @@ export interface NodePaletteProps {
   onOpenSettings?: () => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
 interface NodePaletteItemConfig {
@@ -215,6 +217,8 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
   onOpenSettings,
   isCollapsed: controlledCollapsed,
   onToggleCollapse,
+  isMobileOpen = false,
+  onCloseMobile,
 }) => {
   // Flow store state & actions
   const nodes = useFlowStore((state) => state.nodes);
@@ -277,6 +281,9 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
 
   const handleQuickAdd = (nodeType: NodeType) => {
     addNode(nodeType);
+    if (isMobileOpen && onCloseMobile) {
+      onCloseMobile();
+    }
   };
 
   // Workflow Action Handlers
@@ -351,224 +358,245 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
   }, [searchQuery, selectedCategory]);
 
   return (
-    <aside
-      className={`h-full flex flex-col select-none overflow-hidden z-10 transition-all duration-200 ease-in-out shrink-0 ${
-        isCollapsed ? "w-14 min-w-[56px] max-w-[56px]" : "w-[300px] min-w-[300px] max-w-[300px]"
-      } ${
-        isLight
-          ? "bg-[#FAF8F5]/95 border-r border-[#E7E2D8] text-[#2C2724] shadow-[1px_0_3px_rgba(0,0,0,0.02)]"
-          : "bg-[#080d18] border-r border-slate-800/60 text-slate-100"
-      }`}
-    >
-      {/* Hidden File Input for JSON import */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".json,application/json"
-        onChange={handleImportJson}
-        className="hidden"
-      />
+    <>
+      {/* Mobile Drawer Backdrop Overlay */}
+      {isMobileOpen && (
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Close node library drawer"
+          onClick={onCloseMobile}
+          onKeyDown={(e) => {
+            if (e.key === "Escape" || e.key === "Enter") onCloseMobile?.();
+          }}
+          className="fixed inset-0 top-14 bg-black/60 backdrop-blur-xs z-40 md:hidden animate-fade-in"
+        />
+      )}
 
-      {/* -------------------------------------------------------------
-          COLLAPSED SLIM ICON RAIL (w-14)
-          ------------------------------------------------------------- */}
-      {isCollapsed ? (
-        <div className="w-full h-full flex flex-col items-center justify-between py-2.5 px-1.5 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {/* Top Rail Controls */}
-          <div className="w-full flex flex-col items-center gap-2">
-            {/* Expand Toggle */}
-            <button
-              type="button"
-              onClick={toggleCollapse}
-              title="Expand Node Library & Actions"
-              aria-label="Expand Sidebar"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
-                isLight
-                  ? "bg-[#F5F2EB] hover:bg-white text-[#443E3A] border-[#E7E2D8] hover:border-amber-600/40"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-sky-400 border-slate-800 hover:border-slate-700"
-              }`}
-            >
-              <PanelLeftOpen className="w-4 h-4" />
-            </button>
+      <aside
+        className={`h-full flex flex-col select-none overflow-hidden transition-all duration-200 ease-in-out shrink-0 ${
+          isLight
+            ? "bg-[#FAF8F5] border-r border-[#E7E2D8] text-[#2C2724] shadow-[1px_0_3px_rgba(0,0,0,0.02)]"
+            : "bg-[#080d18] border-r border-slate-800/60 text-slate-100"
+        } ${
+          isMobileOpen
+            ? "fixed inset-y-0 top-14 left-0 z-50 w-[88vw] max-w-[320px] h-[calc(100vh-3.5rem)] shadow-2xl flex md:relative md:top-0 md:h-full md:shadow-none animate-in slide-in-from-left duration-200"
+            : "hidden md:flex"
+        } ${
+          isCollapsed && !isMobileOpen
+            ? "md:w-14 md:min-w-[56px] md:max-w-[56px]"
+            : "md:w-[300px] md:min-w-[300px] md:max-w-[300px]"
+        }`}
+      >
+        {/* Hidden File Input for JSON import */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json"
+          onChange={handleImportJson}
+          className="hidden"
+        />
 
-            <div className={`w-6 h-px my-0.5 ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
+        {/* -------------------------------------------------------------
+            COLLAPSED SLIM ICON RAIL (w-14) - Desktop only when collapsed
+            ------------------------------------------------------------- */}
+        {isCollapsed && !isMobileOpen ? (
+          <div className="w-full h-full flex flex-col items-center justify-between py-2.5 px-1.5 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {/* Top Rail Controls */}
+            <div className="w-full flex flex-col items-center gap-2">
+              {/* Expand Toggle */}
+              <button
+                type="button"
+                onClick={toggleCollapse}
+                title="Expand Node Library & Actions"
+                aria-label="Expand Sidebar"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
+                  isLight
+                    ? "bg-[#F5F2EB] hover:bg-white text-[#443E3A] border-[#E7E2D8] hover:border-amber-600/40"
+                    : "bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-sky-400 border-slate-800 hover:border-slate-700"
+                }`}
+              >
+                <PanelLeftOpen className="w-4 h-4" />
+              </button>
 
-            {/* Workflow Quick Actions */}
-            <button
-              type="button"
-              onClick={handleNewBlankFlow}
-              title="New Blank Workflow"
-              aria-label="New Flow"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
-                isLight
-                  ? "bg-[#F5F2EB] hover:bg-white text-sky-700 border-[#E7E2D8] hover:border-sky-500/40"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-sky-400 border-slate-800"
-              }`}
-            >
-              <FilePlus className="w-4 h-4" />
-            </button>
+              <div className={`w-6 h-px my-0.5 ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
 
-            <button
-              type="button"
-              onClick={() => onOpenTemplates?.("browse")}
-              title="Browse Workflow Templates"
-              aria-label="Templates"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
-                isLight
-                  ? "bg-[#F5F2EB] hover:bg-white text-amber-700 border-[#E7E2D8] hover:border-amber-500/40"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-amber-400 border-slate-800"
-              }`}
-            >
-              <Sparkles className="w-4 h-4" />
-            </button>
+              {/* Workflow Quick Actions */}
+              <button
+                type="button"
+                onClick={handleNewBlankFlow}
+                title="New Blank Workflow"
+                aria-label="New Flow"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
+                  isLight
+                    ? "bg-[#F5F2EB] hover:bg-white text-sky-700 border-[#E7E2D8] hover:border-sky-500/40"
+                    : "bg-slate-900/80 hover:bg-slate-800 text-sky-400 border-slate-800"
+                }`}
+              >
+                <FilePlus className="w-4 h-4" />
+              </button>
 
-            <button
-              type="button"
-              onClick={() => onOpenTemplates?.("save")}
-              title="Save Flow as Template"
-              aria-label="Save Template"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
-                isLight
-                  ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] hover:text-amber-800 border-[#E7E2D8]"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-amber-300 border-slate-800"
-              }`}
-            >
-              <BookmarkPlus className="w-4 h-4" />
-            </button>
+              <button
+                type="button"
+                onClick={() => onOpenTemplates?.("browse")}
+                title="Browse Workflow Templates"
+                aria-label="Templates"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
+                  isLight
+                    ? "bg-[#F5F2EB] hover:bg-white text-amber-700 border-[#E7E2D8] hover:border-amber-500/40"
+                    : "bg-slate-900/80 hover:bg-slate-800 text-amber-400 border-slate-800"
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+              </button>
 
-            <div className={`w-6 h-px my-0.5 ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
+              <button
+                type="button"
+                onClick={() => onOpenTemplates?.("save")}
+                title="Save Flow as Template"
+                aria-label="Save Template"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
+                  isLight
+                    ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] hover:text-amber-800 border-[#E7E2D8]"
+                    : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-amber-300 border-slate-800"
+                }`}
+              >
+                <BookmarkPlus className="w-4 h-4" />
+              </button>
 
-            {/* File I/O Actions */}
-            <button
-              type="button"
-              onClick={handleExportJson}
-              title="Export Workflow JSON"
-              aria-label="Export JSON"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
-                isLight
-                  ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] hover:text-sky-600 border-[#E7E2D8]"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-sky-400 border-slate-800"
-              }`}
-            >
-              <Download className="w-4 h-4" />
-            </button>
+              <div className={`w-6 h-px my-0.5 ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
 
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              title="Import Workflow JSON"
-              aria-label="Import JSON"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
-                isLight
-                  ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] hover:text-sky-600 border-[#E7E2D8]"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-sky-400 border-slate-800"
-              }`}
-            >
-              <Upload className="w-4 h-4" />
-            </button>
+              {/* File I/O Actions */}
+              <button
+                type="button"
+                onClick={handleExportJson}
+                title="Export Workflow JSON"
+                aria-label="Export JSON"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
+                  isLight
+                    ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] hover:text-sky-600 border-[#E7E2D8]"
+                    : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-sky-400 border-slate-800"
+                }`}
+              >
+                <Download className="w-4 h-4" />
+              </button>
 
-            <button
-              type="button"
-              onClick={handleClearCanvas}
-              title="Clear Canvas"
-              aria-label="Clear Canvas"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
-                isLight
-                  ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] hover:text-rose-600 border-[#E7E2D8]"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border-slate-800"
-              }`}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title="Import Workflow JSON"
+                aria-label="Import JSON"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
+                  isLight
+                    ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] hover:text-sky-600 border-[#E7E2D8]"
+                    : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-sky-400 border-slate-800"
+                }`}
+              >
+                <Upload className="w-4 h-4" />
+              </button>
 
-            <div className={`w-6 h-px my-0.5 ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
+              <button
+                type="button"
+                onClick={handleClearCanvas}
+                title="Clear Canvas"
+                aria-label="Clear Canvas"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
+                  isLight
+                    ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] hover:text-rose-600 border-[#E7E2D8]"
+                    : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border-slate-800"
+                }`}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
 
-            {/* Quick Node Spawn/Drag Rails */}
-            <div className="flex flex-col items-center gap-1.5 w-full">
-              {PALETTE_ITEMS.map((item) => (
-                <div
-                  key={item.type}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, item.type)}
-                  onClick={() => handleQuickAdd(item.type)}
-                  title={`${item.title} (Click or Drag to Canvas)`}
-                  className={`w-9 h-9 rounded-lg flex items-center justify-center cursor-grab active:cursor-grabbing transition-all border hover:scale-105 group relative ${
-                    isLight
-                      ? `${item.lightIconStyle.bg} ${item.lightIconStyle.border} ${item.lightIconStyle.text}`
-                      : `${item.iconStyle.bg} ${item.iconStyle.border} ${item.iconStyle.text}`
-                  }`}
-                >
-                  {item.icon}
-                </div>
-              ))}
+              <div className={`w-6 h-px my-0.5 ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
+
+              {/* Quick Node Spawn/Drag Rails */}
+              <div className="flex flex-col items-center gap-1.5 w-full">
+                {PALETTE_ITEMS.map((item) => (
+                  <div
+                    key={item.type}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, item.type)}
+                    onClick={() => handleQuickAdd(item.type)}
+                    title={`${item.title} (Click or Drag to Canvas)`}
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center cursor-grab active:cursor-grabbing transition-all border hover:scale-105 group relative ${
+                      isLight
+                        ? `${item.lightIconStyle.bg} ${item.lightIconStyle.border} ${item.lightIconStyle.text}`
+                        : `${item.iconStyle.bg} ${item.iconStyle.border} ${item.iconStyle.text}`
+                    }`}
+                  >
+                    {item.icon}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom Rail Tools */}
+            <div className="w-full flex flex-col items-center gap-2 pt-2">
+              <div className={`w-6 h-px my-0.5 ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
+
+              {/* Execution Drawer Toggle */}
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(!isDrawerOpen)}
+                title="Execution Logs & Telemetry"
+                aria-label="Toggle Logs"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border relative ${
+                  isDrawerOpen
+                    ? isLight
+                      ? "bg-sky-500/15 text-sky-800 border-sky-500/30"
+                      : "bg-sky-500/20 text-sky-300 border-sky-500/40"
+                    : isLight
+                    ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] border-[#E7E2D8]"
+                    : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 border-slate-800"
+                }`}
+              >
+                <Terminal className="w-4 h-4" />
+                {isDrawerOpen && (
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                )}
+              </button>
+
+              {/* Settings */}
+              <button
+                type="button"
+                onClick={onOpenSettings}
+                title="API Keys & Engine Settings"
+                aria-label="Settings"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border relative ${
+                  isLight
+                    ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] border-[#E7E2D8]"
+                    : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 border-slate-800"
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+                {mockMode && (
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-500" />
+                )}
+              </button>
+
+              {/* Theme Toggle */}
+              <button
+                type="button"
+                onClick={() => setTheme(isLight ? "dark" : "light")}
+                title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
+                aria-label="Toggle Theme"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
+                  isLight
+                    ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] border-[#E7E2D8]"
+                    : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 border-slate-800"
+                }`}
+              >
+                {isLight ? (
+                  <Moon className="w-4 h-4 text-indigo-500" />
+                ) : (
+                  <Sun className="w-4 h-4 text-amber-400" />
+                )}
+              </button>
             </div>
           </div>
-
-          {/* Bottom Rail Tools */}
-          <div className="w-full flex flex-col items-center gap-2 pt-2">
-            <div className={`w-6 h-px my-0.5 ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
-
-            {/* Execution Drawer Toggle */}
-            <button
-              type="button"
-              onClick={() => setDrawerOpen(!isDrawerOpen)}
-              title="Execution Logs & Telemetry"
-              aria-label="Toggle Logs"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border relative ${
-                isDrawerOpen
-                  ? isLight
-                    ? "bg-sky-500/15 text-sky-800 border-sky-500/30"
-                    : "bg-sky-500/20 text-sky-300 border-sky-500/40"
-                  : isLight
-                  ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] border-[#E7E2D8]"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 border-slate-800"
-              }`}
-            >
-              <Terminal className="w-4 h-4" />
-              {isDrawerOpen && (
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
-              )}
-            </button>
-
-            {/* Settings */}
-            <button
-              type="button"
-              onClick={onOpenSettings}
-              title="API Keys & Engine Settings"
-              aria-label="Settings"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border relative ${
-                isLight
-                  ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] border-[#E7E2D8]"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 border-slate-800"
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              {mockMode && (
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-500" />
-              )}
-            </button>
-
-            {/* Theme Toggle */}
-            <button
-              type="button"
-              onClick={() => setTheme(isLight ? "dark" : "light")}
-              title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
-              aria-label="Toggle Theme"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${
-                isLight
-                  ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] border-[#E7E2D8]"
-                  : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 border-slate-800"
-              }`}
-            >
-              {isLight ? (
-                <Moon className="w-4 h-4 text-indigo-500" />
-              ) : (
-                <Sun className="w-4 h-4 text-amber-400" />
-              )}
-            </button>
-          </div>
-        </div>
-      ) : (
+        ) : (
         /* -------------------------------------------------------------
             EXPANDED FULL PANEL (w-[300px])
             ------------------------------------------------------------- */
@@ -581,7 +609,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                 : "bg-[#080d18]/90 border-slate-800/60"
             }`}
           >
-            {/* Title Bar with Collapse Toggle */}
+            {/* Title Bar with Collapse Toggle (Desktop) & Close Button (Mobile) */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div
@@ -617,12 +645,30 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                   <span>{PALETTE_ITEMS.length}</span>
                 </div>
 
+                {/* Mobile Close Button */}
+                {onCloseMobile && (
+                  <button
+                    type="button"
+                    onClick={onCloseMobile}
+                    title="Close Library Drawer"
+                    aria-label="Close Library Drawer"
+                    className={`md:hidden p-1 rounded-md transition-colors border active:scale-95 ${
+                      isLight
+                        ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] hover:text-[#2C2724] border-[#E7E2D8]"
+                        : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border-slate-800/80"
+                    }`}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+
+                {/* Desktop Collapse Toggle */}
                 <button
                   type="button"
                   onClick={toggleCollapse}
                   title="Collapse sidebar"
                   aria-label="Collapse Sidebar"
-                  className={`p-1 rounded-md transition-colors border ${
+                  className={`hidden md:block p-1 rounded-md transition-colors border ${
                     isLight
                       ? "bg-[#F5F2EB] hover:bg-white text-[#7A7269] hover:text-[#2C2724] border-[#E7E2D8]"
                       : "bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border-slate-800/80"
@@ -635,7 +681,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
 
             {/* Integrated Action Buttons Toolbar */}
             <div
-              className={`p-1 rounded-lg border flex items-center justify-between gap-1 text-[11px] ${
+              className={`p-1 rounded-lg border flex flex-wrap items-center justify-between gap-1 text-[11px] ${
                 isLight
                   ? "bg-[#F5F2EB] border-[#E7E2D8]"
                   : "bg-slate-900/80 border-slate-800/80"
@@ -647,28 +693,33 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                   type="button"
                   onClick={handleNewBlankFlow}
                   title="Create a new blank workflow"
-                  className={`flex items-center gap-1 h-6 px-1.5 rounded text-[11px] font-medium transition-all ${
+                  aria-label="New Blank Flow"
+                  className={`flex items-center gap-1 h-7 sm:h-6 px-1.5 rounded text-[11px] font-medium transition-all active:scale-95 ${
                     isLight
                       ? "text-[#443E3A] hover:text-[#2C2724] hover:bg-white"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/90"
                   }`}
                 >
-                  <FilePlus className="w-3 h-3 text-sky-500" />
+                  <FilePlus className="w-3.5 h-3.5 text-sky-500" />
                   <span>New</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => onOpenTemplates?.("browse")}
+                  onClick={() => {
+                    onOpenTemplates?.("browse");
+                    if (isMobileOpen && onCloseMobile) onCloseMobile();
+                  }}
                   title="Browse workflow templates"
-                  className={`flex items-center gap-1 h-6 px-1.5 rounded text-[11px] font-medium transition-all group ${
+                  aria-label="Browse Templates"
+                  className={`flex items-center gap-1 h-7 sm:h-6 px-1.5 rounded text-[11px] font-medium transition-all group active:scale-95 ${
                     isLight
                       ? "text-[#443E3A] hover:text-[#2C2724] hover:bg-white"
                       : "text-slate-300 hover:text-white hover:bg-slate-800/90"
                   }`}
                 >
                   <Sparkles
-                    className={`w-3 h-3 ${
+                    className={`w-3.5 h-3.5 ${
                       isLight ? "text-amber-600" : "text-amber-400"
                     }`}
                   />
@@ -677,20 +728,24 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => onOpenTemplates?.("save")}
+                  onClick={() => {
+                    onOpenTemplates?.("save");
+                    if (isMobileOpen && onCloseMobile) onCloseMobile();
+                  }}
                   title="Save current flow as template"
-                  className={`flex items-center gap-1 h-6 px-1.5 rounded text-[11px] font-medium transition-all ${
+                  aria-label="Save Template"
+                  className={`flex items-center gap-1 h-7 sm:h-6 px-1.5 rounded text-[11px] font-medium transition-all active:scale-95 ${
                     isLight
                       ? "text-amber-800 hover:bg-amber-100/80"
                       : "text-amber-400 hover:text-amber-300 hover:bg-amber-500/15"
                   }`}
                 >
-                  <BookmarkPlus className="w-3 h-3" />
+                  <BookmarkPlus className="w-3.5 h-3.5" />
                   <span>Save</span>
                 </button>
               </div>
 
-              <div className={`h-3.5 w-px ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
+              <div className={`hidden xs:block h-3.5 w-px ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
 
               {/* File I/O */}
               <div className="flex items-center gap-0.5">
@@ -698,39 +753,42 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                   type="button"
                   onClick={handleExportJson}
                   title="Export JSON"
-                  className={`h-6 w-6 flex items-center justify-center rounded transition-all ${
+                  aria-label="Export JSON"
+                  className={`h-7 sm:h-6 w-6 flex items-center justify-center rounded transition-all active:scale-95 ${
                     isLight
                       ? "text-[#7A7269] hover:text-sky-600 hover:bg-white"
                       : "text-slate-400 hover:text-sky-400 hover:bg-slate-800/80"
                   }`}
                 >
-                  <Download className="w-3 h-3" />
+                  <Download className="w-3.5 h-3.5" />
                 </button>
 
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   title="Import JSON"
-                  className={`h-6 w-6 flex items-center justify-center rounded transition-all ${
+                  aria-label="Import JSON"
+                  className={`h-7 sm:h-6 w-6 flex items-center justify-center rounded transition-all active:scale-95 ${
                     isLight
                       ? "text-[#7A7269] hover:text-sky-600 hover:bg-white"
                       : "text-slate-400 hover:text-sky-400 hover:bg-slate-800/80"
                   }`}
                 >
-                  <Upload className="w-3 h-3" />
+                  <Upload className="w-3.5 h-3.5" />
                 </button>
 
                 <button
                   type="button"
                   onClick={handleClearCanvas}
                   title="Clear Canvas"
-                  className={`h-6 w-6 flex items-center justify-center rounded transition-all ${
+                  aria-label="Clear Canvas"
+                  className={`h-7 sm:h-6 w-6 flex items-center justify-center rounded transition-all active:scale-95 ${
                     isLight
                       ? "text-[#7A7269] hover:text-rose-600 hover:bg-white"
                       : "text-slate-400 hover:text-rose-400 hover:bg-slate-800/80"
                   }`}
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -750,7 +808,8 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search components or actions..."
-                className={`w-full rounded-lg pl-8 pr-7 py-1.5 text-xs focus:outline-none transition-all font-sans border ${
+                aria-label="Search components"
+                className={`w-full rounded-lg pl-8 pr-7 py-2 sm:py-1.5 text-xs focus:outline-none transition-all font-sans border ${
                   isLight
                     ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#2C2724] placeholder-[#9C9287] focus:border-amber-600/60 focus:ring-2 focus:ring-amber-500/20"
                     : "bg-slate-900/80 hover:bg-slate-900 border-slate-800/80 focus:border-sky-500/50 focus:bg-slate-900 text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-sky-500/10"
@@ -758,8 +817,10 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
               />
               {searchQuery ? (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery("")}
-                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded transition-colors ${
+                  aria-label="Clear search query"
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded transition-colors ${
                     isLight
                       ? "text-[#9C9287] hover:text-[#443E3A]"
                       : "text-slate-500 hover:text-slate-300"
@@ -769,7 +830,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                 </button>
               ) : (
                 <span
-                  className={`absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono border px-1 py-0.2 rounded pointer-events-none ${
+                  className={`hidden sm:inline-block absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono border px-1 py-0.2 rounded pointer-events-none ${
                     isLight
                       ? "text-[#9C9287] border-[#E7E2D8]"
                       : "text-slate-600 border-slate-800"
@@ -780,11 +841,12 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
               )}
             </div>
 
-            {/* Category Filter Pills */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-0.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] text-[10px]">
+            {/* Category Filter Chips with Smooth Momentum Scrolling */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 custom-scrollbar touch-pan-x overscroll-x-contain text-[11px] sm:text-[10px]">
               <button
+                type="button"
                 onClick={() => setSelectedCategory(null)}
-                className={`px-2 py-0.5 rounded-md whitespace-nowrap transition-all duration-150 font-medium ${
+                className={`px-2.5 py-1 sm:py-0.5 rounded-md whitespace-nowrap transition-all duration-150 font-medium active:scale-95 shrink-0 ${
                   selectedCategory === null
                     ? isLight
                       ? "bg-[#F5F2EB] text-[#443E3A] border border-[#E7E2D8] shadow-sm font-semibold"
@@ -802,8 +864,9 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                 return (
                   <button
                     key={cat}
+                    type="button"
                     onClick={() => setSelectedCategory(isSelected ? null : cat)}
-                    className={`px-2 py-0.5 rounded-md whitespace-nowrap transition-all duration-150 font-medium ${
+                    className={`px-2.5 py-1 sm:py-0.5 rounded-md whitespace-nowrap transition-all duration-150 font-medium active:scale-95 shrink-0 ${
                       isSelected
                         ? isLight
                           ? "bg-[#F5F2EB] text-[#443E3A] border border-[#E7E2D8] shadow-sm font-semibold"
@@ -850,6 +913,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                   Try a different keyword or reset filters
                 </p>
                 <button
+                  type="button"
                   onClick={() => {
                     setSearchQuery("");
                     setSelectedCategory(null);
@@ -918,7 +982,8 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                             key={item.type}
                             draggable
                             onDragStart={(e) => handleDragStart(e, item.type)}
-                            className={`group relative p-2.5 rounded-xl border transition-all duration-150 cursor-grab active:cursor-grabbing hover:-translate-y-0.5 active:scale-[0.99] ${
+                            onClick={() => handleQuickAdd(item.type)}
+                            className={`group relative p-2.5 rounded-xl border transition-all duration-150 cursor-pointer md:cursor-grab active:cursor-grabbing hover:-translate-y-0.5 active:scale-[0.98] ${
                               isLight
                                 ? "bg-[#FAF8F5] border-[#E7E2D8] hover:border-amber-600/40 hover:bg-[#F5F2EB] text-[#443E3A] shadow-[0_2px_8px_-1px_rgba(180,165,145,0.18),inset_0_1px_0_rgba(255,255,255,0.9)]"
                                 : "bg-[#0c1220] hover:bg-[#10192c] border-slate-800/70 hover:border-slate-700/80 hover:shadow-lg hover:shadow-black/40"
@@ -967,16 +1032,17 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                                     handleQuickAdd(item.type);
                                   }}
                                   title="Add to canvas"
-                                  className={`p-1 rounded-md transition-all duration-150 opacity-0 group-hover:opacity-100 shadow-sm border ${
+                                  aria-label={`Add ${item.title} to canvas`}
+                                  className={`p-1.5 sm:p-1 rounded-md transition-all duration-150 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shadow-sm border active:scale-90 ${
                                     isLight
                                       ? "bg-[#F5F2EB] text-[#7A7269] hover:text-white hover:bg-amber-600 border-[#E7E2D8] hover:border-amber-600"
                                       : "bg-slate-800/90 text-slate-400 hover:text-white hover:bg-sky-600 border-slate-700/50 hover:border-sky-500"
                                   }`}
                                 >
-                                  <Plus className="w-3 h-3" />
+                                  <Plus className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
                                 </button>
                                 <div
-                                  className={`transition-colors p-0.5 ${
+                                  className={`hidden md:block transition-colors p-0.5 ${
                                     isLight
                                       ? "text-[#A89F93] group-hover:text-[#7A7269]"
                                       : "text-slate-600 group-hover:text-slate-400"
@@ -1018,9 +1084,13 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
               {/* Telemetry Drawer Trigger */}
               <button
                 type="button"
-                onClick={() => setDrawerOpen(!isDrawerOpen)}
+                onClick={() => {
+                  setDrawerOpen(!isDrawerOpen);
+                  if (isMobileOpen && onCloseMobile) onCloseMobile();
+                }}
                 title="Toggle Execution Telemetry & Logs Drawer"
-                className={`flex items-center gap-1.5 h-6 px-2 rounded-md text-[11px] font-medium transition-all ${
+                aria-label="Toggle Execution Logs"
+                className={`flex items-center gap-1.5 h-7 sm:h-6 px-2 rounded-md text-[11px] font-medium transition-all active:scale-95 ${
                   isDrawerOpen
                     ? isLight
                       ? "bg-sky-500/15 text-sky-800 font-semibold"
@@ -1030,17 +1100,21 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/80"
                 }`}
               >
-                <Terminal className="w-3 h-3" />
+                <Terminal className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
                 <span>Logs</span>
               </button>
 
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5 sm:gap-1">
                 {/* Settings Trigger */}
                 <button
                   type="button"
-                  onClick={onOpenSettings}
+                  onClick={() => {
+                    onOpenSettings?.();
+                    if (isMobileOpen && onCloseMobile) onCloseMobile();
+                  }}
                   title="API Keys & Engine Settings"
-                  className={`h-6 w-6 flex items-center justify-center rounded-md transition-all relative ${
+                  aria-label="API Keys & Settings"
+                  className={`h-7 w-7 sm:h-6 sm:w-6 flex items-center justify-center rounded-md transition-all active:scale-95 relative ${
                     isLight
                       ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-white"
                       : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/80"
@@ -1058,7 +1132,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                   onClick={() => setTheme(isLight ? "dark" : "light")}
                   title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
                   aria-label={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
-                  className={`h-6 w-6 flex items-center justify-center rounded-md transition-all ${
+                  className={`h-7 w-7 sm:h-6 sm:w-6 flex items-center justify-center rounded-md transition-all active:scale-95 ${
                     isLight
                       ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-white"
                       : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/80"
@@ -1093,12 +1167,13 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                   isLight ? "text-[#8E8275]" : "text-slate-500"
                 }`}
               >
-                <span>Drag or click +</span>
+                <span>Tap or Drag</span>
               </div>
             </div>
           </div>
         </>
       )}
     </aside>
+  </>
   );
 };

@@ -1,8 +1,8 @@
-// ThreeGraphManager.ts: High-performance Vanilla Three.js 3D DAG workflow visualizer
+// ThreeGraphManager.ts: High-performance Vanilla Three.js 3D DAG workflow visualizer with mobile responsive camera framing
 // Importers/Callers: src/components/landing/ThreeFlowScene.tsx
 // Affected API: ThreeGraphManager (init, resize, setMousePos, updateTheme, triggerEnergyPulse, destroy)
 // Data Schema: ThreeNodeData ({ id, label, sublabel, type, position, colorDark, colorLight, description })
-// User Instruction: "I want to create landing page for my ai flow project. using three js. plant it using proper agents and skills" + "refereces are here https://getdesign.md/design-md?page=2"
+// User Instruction: "Make the entire Landing Page fully responsive and touch-optimized on mobile devices"
 
 import * as THREE from "three";
 
@@ -126,6 +126,13 @@ export class ThreeGraphManager {
   private onNodeHoverCallback?: (node: ThreeNodeData | null) => void;
   private clock = new THREE.Clock();
 
+  private calculateCameraDistance(aspect: number): number {
+    if (aspect < 0.75) return 15.5;
+    if (aspect < 1.0) return 14.0;
+    if (aspect < 1.3) return 12.2;
+    return 10.5;
+  }
+
   constructor(
     container: HTMLElement,
     isLight: boolean,
@@ -142,10 +149,16 @@ export class ThreeGraphManager {
       0.035
     );
 
-    // 2. Camera Setup
+    // 2. Camera Setup with responsive aspect distance
     const width = this.container.clientWidth || window.innerWidth;
     const height = this.container.clientHeight || window.innerHeight;
-    this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    const aspect = width / (height || 1);
+    const zDistance = this.calculateCameraDistance(aspect);
+
+    this.targetCameraPos.set(0, 0.4, zDistance);
+    this.currentCameraPos.set(0, 0.4, zDistance);
+
+    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 100);
     this.camera.position.copy(this.currentCameraPos);
 
     // 3. Renderer Setup
@@ -517,7 +530,12 @@ export class ThreeGraphManager {
 
   public resize(width: number, height: number) {
     if (!this.renderer || !this.camera) return;
-    this.camera.aspect = width / height;
+    const aspect = width / (height || 1);
+    this.camera.aspect = aspect;
+
+    const zDistance = this.calculateCameraDistance(aspect);
+    this.targetCameraPos.z = zDistance;
+
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
   }

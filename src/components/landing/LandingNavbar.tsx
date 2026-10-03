@@ -1,11 +1,11 @@
-// LandingNavbar.tsx: Sticky glassmorphic navbar with brand logo, nav links, theme switcher, and studio launcher CTA
+// LandingNavbar.tsx: Sticky glassmorphic navbar with brand logo, nav links, theme switcher, mobile menu, and studio launcher CTA
 // Importers/Callers: src/components/landing/LandingPage.tsx
 // Affected API: LandingNavbar: React.FC
 // Data Schema: Component Props ({})
-// User Instruction: "I want to create landing page for my ai flow project. using three js. plant it using proper agents and skills" + "refereces are here https://getdesign.md/design-md?page=2"
+// User Instruction: "Make the entire Landing Page fully responsive and touch-optimized on mobile devices"
 
 import React, { useState, useEffect } from "react";
-import { Sparkles, ArrowRight, Sun, Moon, Layers, Cpu, Terminal, Compass } from "lucide-react";
+import { Sparkles, ArrowRight, Sun, Moon, Layers, Cpu, Terminal, Compass, Menu, X } from "lucide-react";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { useViewStore } from "../../store/useViewStore";
 
@@ -15,6 +15,7 @@ export const LandingNavbar: React.FC = () => {
   const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
   const setView = useViewStore((state) => state.setView);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,37 +25,47 @@ export const LandingNavbar: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-[#FAF8F5]/85 dark:bg-[#080d18]/85 backdrop-blur-xl border-b border-stone-200/80 dark:border-slate-800/80 shadow-md dark:shadow-2xl py-3"
-          : "bg-transparent py-5"
+        isScrolled || mobileMenuOpen
+          ? "bg-[#FAF8F5]/90 dark:bg-[#080d18]/90 backdrop-blur-xl border-b border-stone-200/80 dark:border-slate-800/80 shadow-md dark:shadow-2xl py-2.5 sm:py-3"
+          : "bg-transparent py-3 sm:py-5"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
         <a
           href="#"
-          className="flex items-center gap-3 group focus:outline-none"
+          className="flex items-center gap-2.5 sm:gap-3 group focus:outline-none min-w-0"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-500 p-[1.5px] shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-500 p-[1.5px] shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
             <div className="w-full h-full bg-white dark:bg-slate-950 rounded-[10px] flex items-center justify-center">
-              <Cpu className="w-5 h-5 text-cyan-400 group-hover:rotate-12 transition-transform duration-300" />
+              <Cpu className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 group-hover:rotate-12 transition-transform duration-300" />
             </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5 font-sans">
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm sm:text-base font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1 font-sans truncate">
               AI FLOW <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 font-extrabold">STUDIO</span>
             </span>
-            <span className="text-[10px] font-mono tracking-widest text-slate-500 dark:text-slate-400 uppercase">
+            <span className="text-[9px] sm:text-[10px] font-mono tracking-widest text-slate-500 dark:text-slate-400 uppercase truncate">
               Visual Neural DAG
             </span>
           </div>
         </a>
 
-        {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-slate-600 dark:text-slate-300">
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-xs font-medium text-slate-600 dark:text-slate-300">
           <a
             href="#features"
             className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors flex items-center gap-1.5 py-1"
@@ -86,7 +97,7 @@ export const LandingNavbar: React.FC = () => {
         </nav>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
@@ -100,7 +111,7 @@ export const LandingNavbar: React.FC = () => {
             )}
           </button>
 
-          {/* GitHub Repo */}
+          {/* GitHub Repo Link (Desktop) */}
           <a
             href="https://github.com"
             target="_blank"
@@ -116,13 +127,80 @@ export const LandingNavbar: React.FC = () => {
           {/* Primary CTA: Launch Flow Studio */}
           <button
             onClick={() => setView("studio")}
-            className="relative group flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:via-indigo-500 hover:to-purple-500 shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98]"
+            className="hidden sm:inline-flex relative group items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:via-indigo-500 hover:to-purple-500 shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98]"
           >
             <span>Launch Studio</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </button>
+
+          {/* Mobile Hamburger Menu Toggle */}
+          <button
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
+            className="md:hidden p-2 rounded-xl border border-stone-200 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/60 hover:bg-stone-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-4 h-4 text-slate-900 dark:text-white" />
+            ) : (
+              <Menu className="w-4 h-4 text-slate-900 dark:text-white" />
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Animated Dropdown Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-stone-200/90 dark:border-slate-800/90 bg-[#FAF8F5]/95 dark:bg-[#080d18]/95 backdrop-blur-2xl px-4 pt-3 pb-5 mt-2.5 space-y-3 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+          <nav className="flex flex-col space-y-1">
+            <a
+              href="#features"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-stone-100 dark:hover:bg-slate-800/70 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+            >
+              <Layers className="w-4 h-4 text-cyan-500" />
+              <span>Features</span>
+            </a>
+            <a
+              href="#interactive-3d"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-stone-100 dark:hover:bg-slate-800/70 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+            >
+              <Compass className="w-4 h-4 text-cyan-500" />
+              <span>3D Graph Engine</span>
+            </a>
+            <a
+              href="#templates"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-stone-100 dark:hover:bg-slate-800/70 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+            >
+              <Sparkles className="w-4 h-4 text-purple-500" />
+              <span>Templates</span>
+            </a>
+            <a
+              href="#architecture"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-stone-100 dark:hover:bg-slate-800/70 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+            >
+              <Terminal className="w-4 h-4 text-emerald-500" />
+              <span>Architecture</span>
+            </a>
+          </nav>
+
+          <div className="pt-2 border-t border-stone-200 dark:border-slate-800/80">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setView("studio");
+              }}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:via-indigo-500 hover:to-purple-500 shadow-lg shadow-cyan-500/25 transition-all active:scale-[0.98]"
+            >
+              <span>Launch Flow Studio</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

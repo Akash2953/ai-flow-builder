@@ -24,6 +24,7 @@ export const App: React.FC = () => {
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [templateModalMode, setTemplateModalMode] = useState<"browse" | "save">("browse");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isMobilePaletteOpen, setIsMobilePaletteOpen] = useState(false);
   const theme = useSettingsStore((state) => state.theme);
   const currentView = useViewStore((state) => state.currentView);
   const selectedNodeId = useFlowStore((state) => state.selectedNodeId);
@@ -64,12 +65,16 @@ export const App: React.FC = () => {
           setIsTemplatesOpen(true);
         }}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onToggleMobilePalette={() => setIsMobilePaletteOpen((prev) => !prev)}
+        isMobilePaletteOpen={isMobilePaletteOpen}
       />
 
       {/* Main Workspace */}
       <div className="flex-1 flex relative overflow-hidden">
         {/* Left Sidebar Palette */}
         <NodePalette
+          isMobileOpen={isMobilePaletteOpen}
+          onCloseMobile={() => setIsMobilePaletteOpen(false)}
           onOpenTemplates={(mode = "browse") => {
             setTemplateModalMode(mode);
             setIsTemplatesOpen(true);

@@ -229,7 +229,7 @@ export const ExecutionDrawer: React.FC = () => {
           ? "bg-[#FAF8F5]/95 border-t border-[#E7E2D8] shadow-[0_-8px_32px_rgba(180,165,145,0.2)] text-[#2C2724]"
           : "bg-[#080d18]/95 border-t border-slate-800/80 shadow-[0_-10px_40px_rgba(0,0,0,0.6)] text-slate-100"
       } ${
-        isExpanded ? "h-[68vh]" : "h-80"
+        isExpanded ? "h-[85vh] sm:h-[68vh]" : "h-[60vh] sm:h-80"
       }`}
     >
       {/* Top Ambient Highlight Rim */}
@@ -405,7 +405,7 @@ export const ExecutionDrawer: React.FC = () => {
               setIsExpanded(!isExpanded);
             }}
             title={isExpanded ? "Collapse height" : "Maximize height"}
-            className={`p-1.5 rounded-lg border border-transparent transition-all ${
+            className={`p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg border border-transparent transition-all ${
               isLight
                 ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-[#EBE6DD] hover:border-[#D8D1C5]"
                 : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 hover:border-slate-700/60"
@@ -427,7 +427,7 @@ export const ExecutionDrawer: React.FC = () => {
             }}
             title="Close Drawer"
             aria-label="Close Drawer"
-            className={`p-1.5 rounded-lg border border-transparent transition-all ${
+            className={`p-1.5 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg border border-transparent transition-all ${
               isLight
                 ? "text-[#7A7269] hover:text-rose-700 hover:bg-rose-50 hover:border-rose-200"
                 : "text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/20"
@@ -441,10 +441,10 @@ export const ExecutionDrawer: React.FC = () => {
       {/* -------------------------------------------------------------
           Drawer Body (Timeline Sidebar + Step Detail Pane)
           ------------------------------------------------------------- */}
-      <div className="flex-1 flex overflow-hidden">
-          {/* Step Sequence Timeline (Left) */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+          {/* Step Sequence Timeline (Left/Top) */}
           <div
-            className={`w-72 md:w-80 border-r flex flex-col overflow-hidden select-none flex-shrink-0 transition-colors ${
+            className={`w-full md:w-72 lg:w-80 h-36 md:h-full border-b md:border-b-0 md:border-r flex flex-col overflow-hidden select-none flex-shrink-0 transition-colors ${
               isLight
                 ? "border-[#E7E2D8] bg-[#FAF8F5]"
                 : "border-slate-800/80 bg-[#070b14]/90"

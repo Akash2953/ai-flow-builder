@@ -213,7 +213,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn select-none ${
+      className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-md animate-fadeIn select-none ${
         isLight ? "bg-[#2C2724]/40" : "bg-slate-950/85"
       }`}
       onClick={(e) => {
@@ -221,7 +221,10 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
       }}
     >
       <div
-        className={`w-full max-w-3xl rounded-2xl overflow-hidden flex flex-col max-h-[90vh] relative border transition-all duration-200 ${
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="template-picker-modal-title"
+        className={`w-[calc(100vw-24px)] sm:max-w-4xl max-h-[90vh] sm:max-h-[85vh] mx-auto rounded-2xl overflow-hidden flex flex-col relative border transition-all duration-200 ${
           isLight
             ? "bg-[#FAF8F5] border-[#E7E2D8] text-[#2C2724] shadow-[0_20px_60px_rgba(180,165,145,0.3)]"
             : "bg-[#080d18] border-slate-800/90 text-slate-100 shadow-[0_20px_60px_rgba(0,0,0,0.8)]"
@@ -238,52 +241,69 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
 
         {/* Modal Header */}
         <div
-          className={`px-6 py-4 border-b flex items-center justify-between backdrop-blur-sm ${
+          className={`px-4 sm:px-6 py-3.5 sm:py-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 backdrop-blur-sm shrink-0 ${
             isLight
-              ? "bg-[#FAF8F5]/90 border-[#E7E2D8]"
-              : "bg-[#080d18]/90 border-slate-800/70"
+              ? "bg-[#FAF8F5]/95 border-[#E7E2D8]"
+              : "bg-[#080d18]/95 border-slate-800/70"
           }`}
         >
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center border shadow-sm ${
+          <div className="flex items-center justify-between sm:justify-start gap-2.5 sm:gap-3 min-w-0">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div
+                className={`w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center border shadow-sm shrink-0 ${
+                  isLight
+                    ? "bg-amber-500/10 border-amber-500/25 text-amber-700 shadow-sm"
+                    : "bg-amber-500/10 border-amber-500/25 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]"
+                }`}
+              >
+                <Sparkles className="w-4 h-4" strokeWidth={2.2} />
+              </div>
+              <div className="min-w-0">
+                <h2
+                  id="template-picker-modal-title"
+                  className={`text-xs sm:text-sm font-semibold flex items-center gap-2 truncate ${
+                    isLight ? "text-[#2C2724]" : "text-slate-100"
+                  }`}
+                >
+                  Workflow Template Library
+                </h2>
+                <p
+                  className={`text-[10px] sm:text-[11px] truncate ${
+                    isLight ? "text-[#7A7269]" : "text-slate-400"
+                  }`}
+                >
+                  Jumpstart your pipeline with starter templates or save custom DAG workflows
+                </p>
+              </div>
+            </div>
+
+            {/* Mobile Close Button in Header row */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close Templates"
+              className={`sm:hidden p-2 rounded-lg active:scale-95 transition-all min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0 touch-manipulation ${
                 isLight
-                  ? "bg-amber-500/10 border-amber-500/25 text-amber-700 shadow-sm"
-                  : "bg-amber-500/10 border-amber-500/25 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]"
+                  ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-[#EBE6DD]"
+                  : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/80"
               }`}
             >
-              <Sparkles className="w-4 h-4" strokeWidth={2.2} />
-            </div>
-            <div>
-              <h2
-                className={`text-sm font-semibold flex items-center gap-2 ${
-                  isLight ? "text-[#2C2724]" : "text-slate-100"
-                }`}
-              >
-                Workflow Template Library
-              </h2>
-              <p
-                className={`text-[11px] ${
-                  isLight ? "text-[#7A7269]" : "text-slate-400"
-                }`}
-              >
-                Jumpstart your pipeline with starter templates or save custom DAG workflows
-              </p>
-            </div>
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
             <button
               type="button"
               onClick={handleCreateBlankFlow}
               title="Start a fresh blank workflow from scratch"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border active:scale-95 ${
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border active:scale-95 min-h-[36px] touch-manipulation ${
                 isLight
                   ? "bg-white hover:bg-[#EBE6DD] text-[#2C2724] border-[#E7E2D8] shadow-sm"
                   : "bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700/80 shadow-sm"
               }`}
             >
-              <FilePlus className="w-3.5 h-3.5 text-sky-500" />
+              <FilePlus className="w-3.5 h-3.5 text-sky-500 shrink-0" />
               <span>Blank Flow</span>
             </button>
 
@@ -291,7 +311,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
               type="button"
               onClick={() => setIsSavingCustom(!isSavingCustom)}
               title="Save current canvas as a reusable custom template"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border active:scale-95 ${
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border active:scale-95 min-h-[36px] touch-manipulation ${
                 isSavingCustom
                   ? isLight
                     ? "bg-amber-100 border-amber-300 text-amber-900"
@@ -301,15 +321,16 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
                   : "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30"
               }`}
             >
-              <BookmarkPlus className="w-3.5 h-3.5" />
+              <BookmarkPlus className="w-3.5 h-3.5 shrink-0" />
               <span>{isSavingCustom ? "Cancel Save" : "Save as Template"}</span>
             </button>
 
+            {/* Desktop Close Button */}
             <button
               type="button"
               onClick={onClose}
               aria-label="Close Templates"
-              className={`p-1.5 rounded-lg active:scale-95 transition-all ${
+              className={`hidden sm:flex p-2 rounded-lg active:scale-95 transition-all min-w-[36px] min-h-[36px] items-center justify-center shrink-0 touch-manipulation ${
                 isLight
                   ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-[#EBE6DD]"
                   : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/80"
@@ -324,18 +345,18 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
         {isSavingCustom && (
           <form
             onSubmit={handleSaveAsCustomTemplate}
-            className={`px-6 py-4 border-b space-y-3 animation-fade-in ${
+            className={`px-4 sm:px-6 py-3.5 sm:py-4 border-b space-y-3 animation-fade-in shrink-0 ${
               isLight
                 ? "bg-[#F5F2EB] border-[#E7E2D8]"
                 : "bg-slate-900/60 border-slate-800"
             }`}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
               <span className={`text-xs font-semibold flex items-center gap-1.5 ${isLight ? "text-[#2C2724]" : "text-slate-200"}`}>
-                <BookmarkPlus className="w-4 h-4 text-amber-500" />
+                <BookmarkPlus className="w-4 h-4 text-amber-500 shrink-0" />
                 Save Current Canvas ({currentNodes.length} nodes, {currentEdges.length} connections)
               </span>
-              <span className={`text-[11px] ${isLight ? "text-[#7A7269]" : "text-slate-400"}`}>
+              <span className={`text-[10px] sm:text-[11px] ${isLight ? "text-[#7A7269]" : "text-slate-400"}`}>
                 Persisted securely to browser local template store
               </span>
             </div>
@@ -351,7 +372,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
                   placeholder="e.g. Automated Outreach & Email Drafter"
-                  className={`w-full rounded-lg px-3 py-1.5 text-xs font-medium focus:outline-none transition-all ${
+                  className={`w-full rounded-lg px-3 py-2 sm:py-1.5 text-xs font-medium min-h-[38px] focus:outline-none transition-all ${
                     isLight
                       ? "bg-white border border-[#D4CEB8] text-[#2C2724] focus:ring-1 focus:ring-amber-500 shadow-inner"
                       : "bg-slate-950 border border-slate-700 text-slate-100 focus:ring-1 focus:ring-sky-500"
@@ -366,7 +387,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
                 <select
                   value={customCategory}
                   onChange={(e) => setCustomCategory(e.target.value)}
-                  className={`w-full rounded-lg px-3 py-1.5 text-xs font-medium focus:outline-none transition-all ${
+                  className={`w-full rounded-lg px-3 py-2 sm:py-1.5 text-xs font-medium min-h-[38px] focus:outline-none transition-all ${
                     isLight
                       ? "bg-white border border-[#D4CEB8] text-[#2C2724] focus:ring-1 focus:ring-amber-500 shadow-inner"
                       : "bg-slate-950 border border-slate-700 text-slate-100 focus:ring-1 focus:ring-sky-500"
@@ -390,7 +411,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
                 value={customDesc}
                 onChange={(e) => setCustomDesc(e.target.value)}
                 placeholder="Briefly describe what this workflow pipeline does..."
-                className={`w-full rounded-lg px-3 py-1.5 text-xs font-medium focus:outline-none transition-all ${
+                className={`w-full rounded-lg px-3 py-2 sm:py-1.5 text-xs font-medium min-h-[38px] focus:outline-none transition-all ${
                   isLight
                     ? "bg-white border border-[#D4CEB8] text-[#2C2724] focus:ring-1 focus:ring-amber-500 shadow-inner"
                     : "bg-slate-950 border border-slate-700 text-slate-100 focus:ring-1 focus:ring-sky-500"
@@ -402,7 +423,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
               <button
                 type="button"
                 onClick={() => setIsSavingCustom(false)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`px-4 py-2 sm:py-1.5 rounded-lg text-xs font-medium transition-all min-h-[36px] active:scale-95 touch-manipulation ${
                   isLight
                     ? "bg-[#EBE6DD] hover:bg-[#E0DACF] text-[#443E3A]"
                     : "bg-slate-800 hover:bg-slate-700 text-slate-300"
@@ -413,12 +434,12 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
               <button
                 type="submit"
                 disabled={!customName.trim()}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all shadow-sm ${
+                className={`flex items-center gap-1.5 px-4 py-2 sm:py-1.5 rounded-lg text-xs font-semibold text-white transition-all shadow-sm min-h-[36px] active:scale-95 touch-manipulation ${
                   !customName.trim()
                     ? "bg-amber-400/50 cursor-not-allowed"
                     : isLight
-                    ? "bg-amber-600 hover:bg-amber-700 active:scale-95"
-                    : "bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-bold"
+                    ? "bg-amber-600 hover:bg-amber-700"
+                    : "bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
                 }`}
               >
                 <Check className="w-3.5 h-3.5" />
@@ -431,20 +452,20 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
         {/* Success Alert Banner */}
         {saveSuccessMsg && (
           <div
-            className={`px-6 py-2.5 border-b text-xs flex items-center justify-between animate-fadeIn ${
+            className={`px-4 sm:px-6 py-2.5 border-b text-xs flex items-center justify-between animate-fadeIn shrink-0 ${
               isLight
                 ? "bg-emerald-50 border-emerald-200 text-emerald-800"
                 : "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
             }`}
           >
             <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-500" />
+              <Check className="w-4 h-4 text-emerald-500 shrink-0" />
               <span>{saveSuccessMsg}</span>
             </div>
             <button
               type="button"
               onClick={() => setSaveSuccessMsg("")}
-              className="text-xs hover:opacity-75"
+              className="text-xs hover:opacity-75 p-1 touch-manipulation"
             >
               ✕
             </button>
@@ -453,15 +474,15 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
 
         {/* Filter & Search Bar */}
         <div
-          className={`px-6 py-3 border-b flex flex-col sm:flex-row items-center justify-between gap-3 ${
+          className={`px-4 sm:px-6 py-2.5 sm:py-3 border-b flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0 ${
             isLight
               ? "bg-[#F5F2EB]/80 border-[#E7E2D8]"
               : "bg-[#060a12]/60 border-slate-800/80"
           }`}
         >
-          {/* Category Tabs */}
+          {/* Category Tabs with clean horizontal scrolling on mobile */}
           <div
-            className={`flex items-center gap-1 p-1 rounded-xl border w-full sm:w-auto overflow-x-auto custom-scrollbar ${
+            className={`flex items-center gap-1 p-1 rounded-xl border w-full sm:w-auto overflow-x-auto no-scrollbar sm:custom-scrollbar overscroll-x-contain ${
               isLight
                 ? "bg-[#FAF8F5] border-[#E7E2D8] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]"
                 : "bg-[#080d18] border-slate-800/80"
@@ -480,7 +501,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all active:scale-95 flex items-center gap-1.5 shrink-0 ${
+                  className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-medium transition-all active:scale-95 flex items-center gap-1.5 shrink-0 min-h-[34px] sm:min-h-[28px] touch-manipulation ${
                     selectedCategory === cat
                       ? isLight
                         ? "bg-[#EBE6DD] text-[#2C2724] border border-[#D4CEB8] shadow-sm font-semibold"
@@ -510,7 +531,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
           </div>
 
           {/* Search Input */}
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 shrink-0">
             <Search
               className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 ${
                 isLight ? "text-[#9C9287]" : "text-slate-500"
@@ -521,7 +542,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search templates..."
-              className={`w-full rounded-xl pl-8.5 pr-3 py-1.5 text-xs transition-all ${
+              className={`w-full rounded-xl pl-8.5 pr-3 py-2 sm:py-1.5 text-xs min-h-[38px] sm:min-h-[34px] transition-all ${
                 isLight
                   ? "bg-[#FAF8F5] border border-[#E7E2D8] text-[#2C2724] placeholder-[#9C9287] focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 shadow-inner"
                   : "bg-[#080d18] border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500/80 focus:ring-1 focus:ring-sky-500/50"
@@ -531,7 +552,10 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
         </div>
 
         {/* Template Cards Grid */}
-        <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+        <div
+          className="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1 overscroll-contain"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
           {filteredTemplates.length === 0 ? (
             <div
               className={`text-center py-12 space-y-3 ${
@@ -552,7 +576,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsSavingCustom(true)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                  className={`px-3.5 py-2 rounded-lg text-xs font-semibold border transition-all active:scale-95 touch-manipulation ${
                     isLight
                       ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 border-amber-500/30"
                       : "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30"
@@ -563,11 +587,11 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
               {filteredTemplates.map((template) => (
                 <div
                   key={template.id}
-                  className={`p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between group relative ${
+                  className={`p-3.5 sm:p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between group relative ${
                     isLight
                       ? "bg-[#FAF8F5] border-[#E7E2D8] hover:border-amber-500/50 hover:bg-[#F5F2EB] shadow-[0_2px_8px_rgba(180,165,145,0.12)] hover:shadow-[0_4px_16px_rgba(180,165,145,0.2)]"
                       : "bg-[#060a12]/80 border-slate-800/90 hover:border-sky-500/40 hover:bg-[#0c1220]/90 shadow-sm"
@@ -611,7 +635,8 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
                             type="button"
                             onClick={(e) => handleDeleteCustomTemplate(e, template.id, template.name)}
                             title="Delete custom template"
-                            className={`p-1 rounded-md transition-colors ${
+                            aria-label={`Delete custom template ${template.name}`}
+                            className={`p-1.5 rounded-md transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center touch-manipulation active:scale-95 ${
                               isLight
                                 ? "text-rose-500 hover:bg-rose-100 hover:text-rose-700"
                                 : "text-rose-400 hover:bg-rose-950/60 hover:text-rose-300"
@@ -679,7 +704,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleSelectTemplate(template)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
+                      className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 min-h-[36px] touch-manipulation ${
                         isLight
                           ? "bg-[#2C2724] hover:bg-[#443E3A] text-[#FAF8F5] shadow-sm hover:shadow"
                           : "bg-sky-500/10 hover:bg-sky-500 border border-sky-500/30 text-sky-300 hover:text-slate-950 group-hover:shadow-md group-hover:shadow-sky-500/20"
@@ -697,17 +722,19 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
 
         {/* Modal Footer */}
         <div
-          className={`px-6 py-3 border-t flex items-center justify-between text-xs font-mono ${
+          className={`px-4 sm:px-6 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-mono shrink-0 ${
             isLight
-              ? "bg-[#FAF8F5]/90 border-[#E7E2D8] text-[#7A7269]"
-              : "bg-[#080d18]/90 border-slate-800/80 text-slate-500"
+              ? "bg-[#FAF8F5]/95 border-[#E7E2D8] text-[#7A7269]"
+              : "bg-[#080d18]/95 border-slate-800/80 text-slate-500"
           }`}
         >
-          <span>Choose a starter template or start from a blank canvas</span>
+          <span className="text-[11px] sm:text-xs text-center sm:text-left">
+            Choose a starter template or start from a blank canvas
+          </span>
           <button
             type="button"
             onClick={onClose}
-            className={`px-3 py-1 rounded-lg transition-colors border ${
+            className={`w-full sm:w-auto px-4 py-1.5 rounded-lg transition-colors border min-h-[36px] sm:min-h-[30px] flex items-center justify-center touch-manipulation active:scale-95 ${
               isLight
                 ? "bg-[#F5F2EB] hover:bg-[#EBE6DD] text-[#443E3A] border-[#E7E2D8] shadow-sm"
                 : "bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800"

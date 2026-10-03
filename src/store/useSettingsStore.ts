@@ -6,6 +6,8 @@ export interface ApiKeys {
   gemini?: string;
   groq?: string;
   ollamaUrl?: string;
+  openrouter?: string;
+  deepseek?: string;
 }
 
 interface SettingsState {

@@ -1,4 +1,4 @@
-/* index.css: Global styles, design tokens, and React Flow dual-theme overrides */
+/* index.css: Global styles, design tokens, responsive touch utilities, and React Flow dual-theme overrides */
 /* Importers/Callers: src/main.tsx */
 /* Affected API: Tailwind base/components/utilities, React Flow handles, edges, background, minimap, controls, scrollbars */
 /* Design System: Plus Jakarta Sans / JetBrains Mono, Refined Obsidian Dark (#090D16), Warm Tactile Soft-Clay (#FAF8F5) */
@@ -16,11 +16,27 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+
+  /* iOS Safe Area Insets */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
 :root[data-theme="light"],
 html.light {
   color-scheme: light;
+}
+
+html, body {
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior-y: none;
+}
+
+/* Touch manipulation optimization */
+button, input, select, textarea, [role="button"], a {
+  touch-action: manipulation;
 }
 
 code, pre, .font-mono {
@@ -31,9 +47,38 @@ code, pre, .font-mono {
   font-variant-numeric: tabular-nums;
 }
 
+/* Safe area padding utilities for mobile devices */
+.safe-area-bottom {
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+}
+
+.safe-area-top {
+  padding-top: max(12px, env(safe-area-inset-top, 0px));
+}
+
+.safe-area-padding {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
 /* -------------------------------------------------------------
-   Custom Sleek Scrollbar (Pure #000000 Avoidance)
+   Custom Sleek Scrollbar & Touch Scroll Containment
    ------------------------------------------------------------- */
+.custom-scrollbar {
+  -webkit-overflow-scrolling: touch;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -62,6 +107,17 @@ html.light ::-webkit-scrollbar-thumb,
 html.light ::-webkit-scrollbar-thumb:hover,
 [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
   background: #B8B09D;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.4);
+    border-radius: 4px;
+  }
 }
 
 /* -------------------------------------------------------------
@@ -106,6 +162,7 @@ html.light .react-flow__background,
 
 .react-flow__node {
   cursor: grab;
+  touch-action: none;
 }
 
 .react-flow__node:active {
@@ -124,7 +181,7 @@ html.light .react-flow__selection,
   border: 1px dashed rgba(217, 119, 6, 0.55) !important;
 }
 
-/* Precision Node Handles */
+/* Precision Node Handles with 28px touch hit zone */
 .react-flow__handle {
   width: 10px !important;
   height: 10px !important;
@@ -134,16 +191,17 @@ html.light .react-flow__selection,
   box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35) !important;
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease, box-shadow 0.15s ease !important;
   z-index: 10 !important;
+  touch-action: none !important;
 }
 
-/* Invisible 24px touch/click target for effortless dragging */
+/* Invisible 28px touch/click target for effortless dragging and connection on mobile */
 .react-flow__handle::after {
   content: "";
   position: absolute;
-  top: -7px;
-  left: -7px;
-  right: -7px;
-  bottom: -7px;
+  top: -9px;
+  left: -9px;
+  right: -9px;
+  bottom: -9px;
   border-radius: 50%;
   background: transparent;
   cursor: crosshair;
@@ -227,6 +285,7 @@ html.light .react-flow__edge.selected.animated .react-flow__edge-path,
   r: 6 !important;
   cursor: grab !important;
   filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8));
+  touch-action: none !important;
 }
 .react-flow__edgeupdater:hover {
   r: 8 !important;
@@ -278,6 +337,9 @@ html.light .react-flow__connection-path,
   border-bottom: 1px solid #1E293B !important;
   color: #94A3B8 !important;
   fill: #94A3B8 !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  touch-action: manipulation;
 }
 .react-flow__controls-button:hover {
   background: #161F36 !important;

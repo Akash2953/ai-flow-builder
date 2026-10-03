@@ -353,8 +353,8 @@ export const NodeInspector: React.FC = () => {
 
   // --- Common Input Styles Helper ---
   const inputClass = isLight
-    ? "w-full px-2.5 py-1.5 rounded-lg bg-[#F5F2EB] hover:bg-[#FAF8F5] border border-[#E7E2D8] text-xs text-[#2C2724] placeholder-[#9C9287] focus:outline-none focus:border-amber-600/70 focus:ring-2 focus:ring-amber-500/20 font-sans transition-all"
-    : "w-full px-2.5 py-1.5 rounded-lg bg-[#060a12]/80 hover:bg-[#060a12] border border-slate-800/80 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/10 font-sans transition-all";
+    ? "w-full px-3 py-2 sm:px-2.5 sm:py-1.5 rounded-lg bg-[#F5F2EB] hover:bg-[#FAF8F5] border border-[#E7E2D8] text-sm sm:text-xs text-[#2C2724] placeholder-[#9C9287] focus:outline-none focus:border-amber-600/70 focus:ring-2 focus:ring-amber-500/20 font-sans transition-all"
+    : "w-full px-3 py-2 sm:px-2.5 sm:py-1.5 rounded-lg bg-[#060a12]/80 hover:bg-[#060a12] border border-slate-800/80 text-sm sm:text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/10 font-sans transition-all";
 
   const labelClass = `block text-[11px] font-semibold mb-1.5 ${
     isLight ? "text-[#443E3A]" : "text-slate-300"
@@ -743,7 +743,7 @@ export const NodeInspector: React.FC = () => {
     return (
       <div className="space-y-4">
         {/* Provider & Model Selector */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
             <label className={labelClass}>
               Provider
@@ -755,7 +755,7 @@ export const NodeInspector: React.FC = () => {
                 handleFieldChange("provider", newProvider);
                 handleFieldChange("model", MODEL_OPTIONS[newProvider]?.[0] || "gpt-4o");
               }}
-              className={`w-full px-2.5 py-1.5 rounded-lg border text-xs font-sans cursor-pointer transition-all ${
+              className={`w-full px-3 py-2 sm:px-2.5 sm:py-1.5 rounded-lg border text-sm sm:text-xs font-sans cursor-pointer transition-all ${
                 isLight
                   ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#2C2724] focus:border-sky-600/70 focus:ring-2 focus:ring-sky-500/20"
                   : "bg-[#060a12]/80 border-slate-800/80 text-slate-200 focus:border-sky-500/60 focus:ring-2 focus:ring-sky-500/10"
@@ -777,7 +777,7 @@ export const NodeInspector: React.FC = () => {
             <select
               value={data.model || MODEL_OPTIONS[provider]?.[0] || "gpt-4o"}
               onChange={(e) => handleFieldChange("model", e.target.value)}
-              className={`w-full px-2.5 py-1.5 rounded-lg border text-xs font-sans cursor-pointer transition-all ${
+              className={`w-full px-3 py-2 sm:px-2.5 sm:py-1.5 rounded-lg border text-sm sm:text-xs font-sans cursor-pointer transition-all ${
                 isLight
                   ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#2C2724] focus:border-sky-600/70 focus:ring-2 focus:ring-sky-500/20"
                   : "bg-[#060a12]/80 border-slate-800/80 text-slate-200 focus:border-sky-500/60 focus:ring-2 focus:ring-sky-500/10"
@@ -1304,7 +1304,7 @@ export const NodeInspector: React.FC = () => {
             <GitBranch className={`w-3.5 h-3.5 ${isLight ? "text-purple-700" : "text-purple-400"}`} />
             <span>Port Routing Legend</span>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-[11px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
             <div
               className={`p-2 rounded-lg border flex items-start gap-1.5 ${
                 isLight
@@ -1822,7 +1822,7 @@ export const NodeInspector: React.FC = () => {
             <label className={labelClass}>
               Download Document File
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => downloadText(formattedOutputStr, "tailored_resume.txt")}
@@ -1872,13 +1872,20 @@ export const NodeInspector: React.FC = () => {
   };
 
   return (
-    <aside
-      className={`w-80 h-full flex flex-col select-none overflow-hidden z-10 backdrop-blur-md relative transition-colors duration-200 ${
-        isLight
-          ? "bg-[#FAF8F5]/95 border-l border-[#E7E2D8] text-[#2C2724] shadow-[-2px_0_12px_rgba(0,0,0,0.03)]"
-          : "bg-[#080d18] border-l border-slate-800/60 text-slate-100"
-      }`}
-    >
+    <>
+      {/* Mobile Backdrop Overlay */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden animate-in fade-in duration-200"
+        onClick={() => setSelectedNodeId(null)}
+        aria-hidden="true"
+      />
+      <aside
+        className={`fixed inset-y-0 right-0 z-40 w-full sm:w-96 md:relative md:w-80 md:inset-auto md:z-10 h-full flex flex-col select-none overflow-hidden backdrop-blur-md shadow-2xl md:shadow-[-2px_0_12px_rgba(0,0,0,0.03)] transition-all duration-200 animate-in slide-in-from-right-5 ${
+          isLight
+            ? "bg-[#FAF8F5]/98 border-l border-[#E7E2D8] text-[#2C2724]"
+            : "bg-[#080d18]/98 border-l border-slate-800/60 text-slate-100"
+        }`}
+      >
       {/* Top Ambient Highlight Rim */}
       <div
         className={`absolute inset-x-0 top-0 h-[1px] pointer-events-none ${
@@ -1952,7 +1959,7 @@ export const NodeInspector: React.FC = () => {
               onClick={() => duplicateNode(selectedNode.id)}
               title="Duplicate Node"
               aria-label="Duplicate Node"
-              className={`p-1 rounded-md transition-all active:scale-95 ${
+              className={`p-1.5 sm:p-1 min-w-[30px] min-h-[30px] flex items-center justify-center rounded-md transition-all active:scale-95 ${
                 isLight
                   ? "text-[#443E3A] hover:text-[#2C2724] hover:bg-[#EBE6DD]"
                   : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
@@ -1965,7 +1972,7 @@ export const NodeInspector: React.FC = () => {
               onClick={() => deleteNode(selectedNode.id)}
               title="Delete Node"
               aria-label="Delete Node"
-              className={`p-1 rounded-md transition-all active:scale-95 ${
+              className={`p-1.5 sm:p-1 min-w-[30px] min-h-[30px] flex items-center justify-center rounded-md transition-all active:scale-95 ${
                 isLight
                   ? "text-[#443E3A] hover:text-rose-600 hover:bg-[#EBE6DD]"
                   : "text-slate-400 hover:text-rose-400 hover:bg-slate-800"
@@ -1978,7 +1985,7 @@ export const NodeInspector: React.FC = () => {
               onClick={() => setSelectedNodeId(null)}
               title="Close / Deselect"
               aria-label="Close / Deselect"
-              className={`p-1 rounded-md transition-all active:scale-95 ${
+              className={`p-1.5 sm:p-1 min-w-[30px] min-h-[30px] flex items-center justify-center rounded-md transition-all active:scale-95 ${
                 isLight
                   ? "text-[#443E3A] hover:text-[#2C2724] hover:bg-[#EBE6DD]"
                   : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
@@ -2091,6 +2098,7 @@ export const NodeInspector: React.FC = () => {
         {nodeType === "output" && renderOutputInspector()}
       </div>
     </aside>
+  </>
   );
 };
 

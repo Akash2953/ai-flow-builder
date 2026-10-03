@@ -28,9 +28,16 @@ import { validateWorkflow, executeWorkflow } from "../../engine/dagRunner";
 export interface HeaderToolbarProps {
   onOpenTemplates?: (mode?: "browse" | "save") => void;
   onOpenSettings?: () => void;
+  onToggleMobilePalette?: () => void;
+  isMobilePaletteOpen?: boolean;
 }
 
-export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
+export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
+  onOpenTemplates,
+  onOpenSettings,
+  onToggleMobilePalette,
+  isMobilePaletteOpen,
+}) => {
   const popoverRef = useRef<HTMLDivElement>(null);
 
   // Flow store state
@@ -105,7 +112,7 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
 
   return (
     <header
-      className={`h-14 px-4 flex items-center justify-between z-20 select-none relative transition-colors duration-200 border-b ${
+      className={`h-14 px-2 sm:px-4 flex items-center justify-between z-20 select-none relative transition-colors duration-200 border-b ${
         isLight
           ? "bg-[#FAF8F5]/95 backdrop-blur-xl border-[#E7E2D8] text-[#2C2724] shadow-[0_1px_3px_rgba(0,0,0,0.03)]"
           : "bg-[#080d1a]/95 backdrop-blur-xl border-slate-800/80 text-slate-100"
@@ -121,20 +128,41 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
       />
 
       {/* -------------------------------------------------------------
-          Left: Interactive Brand Mark (Return to Overview) + Prominent Workflow Name Pill + Saved Indicator
+          Left: Mobile Palette Toggle + Brand Mark + Workflow Name Editor
           ------------------------------------------------------------- */}
-      <div className="flex items-center gap-3.5">
+      <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
+        {/* Mobile Node Library Toggle Drawer Button (< md) */}
+        <button
+          type="button"
+          onClick={onToggleMobilePalette}
+          title={isMobilePaletteOpen ? "Close Node Library" : "Open Node Library"}
+          aria-label={isMobilePaletteOpen ? "Close Node Library" : "Open Node Library"}
+          aria-expanded={isMobilePaletteOpen}
+          className={`md:hidden h-9 px-2 sm:px-2.5 rounded-xl flex items-center gap-1.5 border text-xs font-semibold transition-all shrink-0 active:scale-95 ${
+            isMobilePaletteOpen
+              ? isLight
+                ? "bg-amber-500/20 text-amber-900 border-amber-500/40 shadow-sm"
+                : "bg-sky-500/25 text-sky-200 border-sky-500/50 shadow-[0_0_12px_rgba(56,189,248,0.3)]"
+              : isLight
+              ? "bg-[#F5F2EB] hover:bg-white text-[#443E3A] border-[#E7E2D8] shadow-sm"
+              : "bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800"
+          }`}
+        >
+          <Workflow className="w-4 h-4 text-sky-500" />
+          <span className="hidden xs:inline text-[11px]">Nodes</span>
+        </button>
+
         {/* Interactive Brand Mark -> 3D Overview */}
         <button
           type="button"
           onClick={() => setView("landing")}
-          className="flex items-center gap-2 group cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded-xl p-1 -m-1 transition-all"
+          className="flex items-center gap-1.5 sm:gap-2 group cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded-xl p-1 -m-1 transition-all shrink-0"
           title="Return to 3D Overview"
         >
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm text-white transition-all duration-200 group-hover:scale-105 group-hover:shadow-[0_0_14px_rgba(56,189,248,0.4)]">
             <Workflow className="w-4 h-4 drop-shadow-sm transition-transform duration-200 group-hover:rotate-6" />
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="hidden sm:flex items-center gap-1.5">
             <span
               className={`text-sm font-bold tracking-tight transition-colors ${
                 isLight ? "text-[#2C2724] group-hover:text-sky-600" : "text-slate-100 group-hover:text-sky-400"
@@ -154,12 +182,12 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
           </div>
         </button>
 
-        <div className={`h-5 w-px ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
+        <div className={`hidden sm:block h-5 w-px ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
 
         {/* Hero-like Highlighted Workflow Name Editor */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
           {isEditingName ? (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <input
                 type="text"
                 value={editNameValue}
@@ -172,7 +200,8 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
                   }
                 }}
                 autoFocus
-                className={`rounded-xl px-3 py-1 text-sm sm:text-base font-bold tracking-tight focus:outline-none focus:ring-2 shadow-inner w-56 sm:w-72 transition-all ${
+                aria-label="Workflow Name Input"
+                className={`rounded-xl px-2.5 py-1 text-xs sm:text-sm font-bold tracking-tight focus:outline-none focus:ring-2 shadow-inner w-28 xs:w-36 sm:w-56 md:w-72 transition-all ${
                   isLight
                     ? "bg-[#F5F2EB] border border-amber-500/40 text-[#2C2724] focus:ring-amber-500/30"
                     : "bg-slate-900/90 border border-sky-500/50 text-slate-100 focus:ring-sky-500/40"
@@ -183,13 +212,14 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
                 type="button"
                 onClick={handleSaveName}
                 title="Save name (Enter)"
-                className={`p-1.5 rounded-lg transition-colors border ${
+                aria-label="Save workflow name"
+                className={`p-1.5 rounded-lg transition-colors border active:scale-95 ${
                   isLight
                     ? "bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 border-amber-500/30"
                     : "bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border-sky-500/30"
                 }`}
               >
-                <Check className="w-4 h-4" />
+                <Check className="w-3.5 h-3.5" />
               </button>
               <button
                 type="button"
@@ -198,18 +228,19 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
                   setIsEditingName(false);
                 }}
                 title="Cancel (Esc)"
-                className={`p-1.5 rounded-lg transition-colors ${
+                aria-label="Cancel renaming"
+                className={`p-1.5 rounded-lg transition-colors active:scale-95 ${
                   isLight
                     ? "bg-[#EBE6DD] hover:bg-[#E0DACF] text-[#7A7269]"
                     : "bg-slate-800/80 hover:bg-slate-700 text-slate-400"
                 }`}
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
             <div
-              className={`flex items-center gap-2 group cursor-pointer px-3 py-1.5 rounded-xl border transition-all duration-200 ${
+              className={`flex items-center gap-1.5 sm:gap-2 group cursor-pointer px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border transition-all duration-200 ${
                 isLight
                   ? "bg-gradient-to-b from-[#F5F2EB] to-[#EBE6DD] hover:from-[#EFE9DC] hover:to-[#E5DECF] border-[#DDD7C8] hover:border-[#CAC2B0] shadow-[0_1px_3px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.8)]"
                   : "bg-gradient-to-b from-slate-900/90 to-slate-950/90 hover:from-slate-800/90 hover:to-slate-900/90 border-slate-800/90 hover:border-slate-700/90 shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)]"
@@ -221,7 +252,7 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
               title="Click to rename workflow"
             >
               <span
-                className={`text-sm sm:text-base font-bold tracking-tight transition-colors max-w-[180px] sm:max-w-[280px] md:max-w-[360px] truncate ${
+                className={`text-xs sm:text-sm md:text-base font-bold tracking-tight transition-colors max-w-[80px] xs:max-w-[110px] sm:max-w-[200px] md:max-w-[320px] truncate ${
                   isLight
                     ? "text-[#2C2724] group-hover:text-black"
                     : "text-slate-100 group-hover:text-white"
@@ -230,7 +261,7 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
                 {workflowName}
               </span>
               <Edit3
-                className={`w-3.5 h-3.5 transition-all ${
+                className={`w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 transition-all ${
                   isLight
                     ? "text-[#9C9287] group-hover:text-amber-700 opacity-60 group-hover:opacity-100"
                     : "text-slate-400 group-hover:text-sky-400 opacity-60 group-hover:opacity-100"
@@ -241,7 +272,7 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
 
           {/* Auto-saved Status Badge */}
           <div
-            className={`hidden md:flex items-center gap-1.5 text-[11px] font-mono px-2 py-0.5 rounded-md ${
+            className={`hidden lg:flex items-center gap-1.5 text-[11px] font-mono px-2 py-0.5 rounded-md ${
               isLight ? "text-[#7A7269] bg-[#EDE8DE]/60" : "text-slate-500 bg-slate-900/40"
             }`}
           >
@@ -260,13 +291,16 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
       {/* -------------------------------------------------------------
           Right / Center Controls: DAG Status Badge & Popover, Primary Run Button, Theme Toggle
           ------------------------------------------------------------- */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
         {/* Validation Status Badge with Popover */}
         <div className="relative" ref={popoverRef}>
           <button
             type="button"
             onClick={() => setShowValidationPopover(!showValidationPopover)}
-            className={`flex items-center gap-2 h-8.5 px-3 rounded-xl text-xs font-mono border whitespace-nowrap transition-all shadow-sm ${
+            title="Validation status & DAG audit"
+            aria-label="Toggle DAG validation status popover"
+            aria-expanded={showValidationPopover}
+            className={`flex items-center gap-1.5 sm:gap-2 h-9 px-2 sm:px-3 rounded-xl text-xs font-mono border whitespace-nowrap transition-all shadow-sm active:scale-95 ${
               validation.valid
                 ? isLight
                   ? "bg-emerald-500/10 border-emerald-600/30 text-emerald-800 hover:bg-emerald-500/20"
@@ -278,7 +312,7 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
           >
             {validation.valid ? (
               <>
-                <span className="relative flex h-2 w-2">
+                <span className="relative flex h-2 w-2 shrink-0">
                   <span
                     className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
                       isLight ? "bg-emerald-500" : "bg-emerald-400"
@@ -290,13 +324,15 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
                     }`}
                   />
                 </span>
-                <span className="font-semibold tracking-tight">DAG Valid</span>
+                <span className="font-semibold tracking-tight text-[11px] sm:text-xs">
+                  <span className="hidden sm:inline">DAG </span>Valid
+                </span>
                 <span
-                  className={`text-[10px] ${
+                  className={`hidden md:inline text-[10px] ${
                     isLight ? "text-emerald-800/70" : "text-emerald-400/70"
                   }`}
                 >
-                  ({nodes.length} nodes)
+                  ({nodes.length})
                 </span>
                 <ChevronDown
                   className={`w-3 h-3 transition-transform ${
@@ -307,12 +343,13 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
             ) : (
               <>
                 <AlertTriangle
-                  className={`w-3.5 h-3.5 animate-pulse ${
+                  className={`w-3.5 h-3.5 shrink-0 animate-pulse ${
                     isLight ? "text-rose-600" : "text-rose-400"
                   }`}
                 />
-                <span className="font-semibold tracking-tight">
-                  {validation.errors.length} DAG {validation.errors.length === 1 ? "Issue" : "Issues"}
+                <span className="font-semibold tracking-tight text-[11px] sm:text-xs">
+                  {validation.errors.length} <span className="hidden sm:inline">DAG </span>
+                  {validation.errors.length === 1 ? "Issue" : "Issues"}
                 </span>
                 <ChevronDown
                   className={`w-3 h-3 transition-transform ${
@@ -323,13 +360,13 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
             )}
           </button>
 
-          {/* Glassmorphic Validation Popover */}
+          {/* Glassmorphic Validation Popover (Screen-Clamped) */}
           {showValidationPopover && (
             <div
-              className={`absolute top-full mt-2.5 right-0 sm:left-1/2 sm:-translate-x-1/2 w-84 rounded-2xl p-4 z-50 text-xs animation-fade-in border ${
+              className={`fixed sm:absolute top-16 sm:top-full mt-0 sm:mt-2.5 right-3 sm:right-0 sm:left-1/2 sm:-translate-x-1/2 w-[calc(100vw-24px)] max-w-sm sm:w-84 max-h-[calc(100vh-5rem)] overflow-y-auto rounded-2xl p-3.5 sm:p-4 z-50 text-xs animation-fade-in border shadow-2xl ${
                 isLight
                   ? "bg-[#FAF8F5] border-[#E7E2D8] text-[#2C2724] shadow-[0_12px_32px_rgba(180,165,145,0.25)]"
-                  : "bg-[#0c1220]/95 backdrop-blur-xl border-slate-800/90 text-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+                  : "bg-[#0c1220]/98 backdrop-blur-2xl border-slate-800/90 text-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
               }`}
             >
               {/* Popover Header */}
@@ -371,6 +408,7 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
                   <button
                     type="button"
                     onClick={() => setShowValidationPopover(false)}
+                    aria-label="Close popover"
                     className={`p-1 rounded-md transition-colors ${
                       isLight
                         ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-[#EBE6DD]"
@@ -541,7 +579,8 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
           type="button"
           disabled={!validation.valid || isExecuting}
           onClick={handleRunWorkflow}
-          className={`flex items-center gap-2 h-8.5 px-4 rounded-xl text-xs font-semibold transition-all select-none border whitespace-nowrap ${
+          aria-label={isExecuting ? "Executing workflow" : "Run workflow"}
+          className={`flex items-center gap-1.5 sm:gap-2 h-9 min-h-[38px] px-2.5 sm:px-4 rounded-xl text-xs font-semibold transition-all select-none border whitespace-nowrap active:scale-[0.98] ${
             isExecuting
               ? isLight
                 ? "bg-sky-600 border-sky-500 text-white animate-pulse shadow-md cursor-wait"
@@ -551,24 +590,26 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
                 ? "bg-[#EBE6DD] border-[#E7E2D8] text-[#9C9287] cursor-not-allowed opacity-70 shadow-none"
                 : "bg-slate-900/80 border-slate-800/80 text-slate-500 cursor-not-allowed opacity-60 shadow-none"
               : isLight
-              ? "bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-400 hover:via-sky-500 hover:to-indigo-500 active:scale-[0.98] text-white border-white/40 shadow-[0_2px_10px_rgba(14,165,233,0.35)] cursor-pointer"
-              : "bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-400 hover:via-sky-500 hover:to-indigo-500 active:scale-[0.98] text-white border-sky-400/30 shadow-[0_0_18px_rgba(56,189,248,0.25)] hover:shadow-[0_0_24px_rgba(56,189,248,0.4)] cursor-pointer"
+              ? "bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-400 hover:via-sky-500 hover:to-indigo-500 text-white border-white/40 shadow-[0_2px_10px_rgba(14,165,233,0.35)] cursor-pointer"
+              : "bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-400 hover:via-sky-500 hover:to-indigo-500 text-white border-sky-400/30 shadow-[0_0_18px_rgba(56,189,248,0.25)] hover:shadow-[0_0_24px_rgba(56,189,248,0.4)] cursor-pointer"
           }`}
         >
           {isExecuting ? (
             <>
               <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-200" />
-              <span>Running...</span>
+              <span className="hidden sm:inline">Running...</span>
             </>
           ) : (
             <>
               <Play className="w-3.5 h-3.5 fill-current text-sky-100" />
-              <span>Run Workflow</span>
+              <span>
+                Run<span className="hidden sm:inline"> Flow</span>
+              </span>
             </>
           )}
         </button>
 
-        <div className={`h-5 w-px ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
+        <div className={`hidden xs:block h-5 w-px ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
 
         {/* Dual Theme Toggle (Sun / Moon) */}
         <button
@@ -576,7 +617,7 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
           onClick={() => setTheme(isLight ? "dark" : "light")}
           title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
           aria-label={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
-          className={`h-8 w-8 flex items-center justify-center rounded-xl border transition-all cursor-pointer ${
+          className={`h-9 w-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl border transition-all cursor-pointer active:scale-95 ${
             isLight
               ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#7A7269] hover:text-[#2C2724] hover:bg-white shadow-sm"
               : "bg-slate-900/80 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 shadow-sm"

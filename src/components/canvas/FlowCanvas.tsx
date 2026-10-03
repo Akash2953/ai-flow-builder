@@ -238,9 +238,9 @@ const CanvasHUD: React.FC<{
   };
 
   return (
-    <Panel position="bottom-center" className="!mb-14">
+    <Panel position="bottom-center" className="!mb-3 sm:!mb-14 max-w-[calc(100vw-16px)]">
       <div
-        className={`flex items-center gap-1.5 p-1.5 rounded-2xl backdrop-blur-md border select-none transition-all ${
+        className={`flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-2xl backdrop-blur-md border select-none transition-all max-w-[calc(100vw-24px)] overflow-x-auto custom-scrollbar ${
           isLight
             ? "bg-[#FAF8F5]/90 border-[#E7E2D8] shadow-[0_8px_32px_rgba(180,165,145,0.3)] text-[#443E3A]"
             : "bg-[#0c1220]/90 border-slate-800/80 shadow-[0_8px_32px_rgba(0,0,0,0.5)] text-slate-300"
@@ -248,7 +248,7 @@ const CanvasHUD: React.FC<{
       >
         {/* Zoom Controls */}
         <div
-          className={`flex items-center gap-0.5 rounded-xl p-0.5 border ${
+          className={`flex items-center gap-0.5 rounded-xl p-0.5 border shrink-0 ${
             isLight
               ? "bg-[#F5F2EB] border-[#E7E2D8]"
               : "bg-slate-900/80 border-slate-800/60"
@@ -258,7 +258,8 @@ const CanvasHUD: React.FC<{
             type="button"
             onClick={() => zoomOut({ duration: 200 })}
             title="Zoom Out (-)"
-            className={`p-1.5 rounded-lg active:scale-95 transition-all ${
+            aria-label="Zoom Out"
+            className={`p-1 sm:p-1.5 rounded-lg active:scale-95 transition-all ${
               isLight
                 ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-[#EBE6DD]"
                 : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
@@ -271,7 +272,7 @@ const CanvasHUD: React.FC<{
             type="button"
             onClick={() => zoomTo(1, { duration: 200 })}
             title="Reset Zoom to 100%"
-            className={`px-2 py-1 text-[11px] font-mono font-medium rounded-md transition-colors min-w-[44px] text-center ${
+            className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-mono font-medium rounded-md transition-colors min-w-[38px] sm:min-w-[44px] text-center ${
               isLight
                 ? "text-[#2C2724] hover:text-amber-600 hover:bg-[#EBE6DD]"
                 : "text-slate-300 hover:text-sky-400 hover:bg-slate-800"
@@ -284,7 +285,8 @@ const CanvasHUD: React.FC<{
             type="button"
             onClick={() => zoomIn({ duration: 200 })}
             title="Zoom In (+)"
-            className={`p-1.5 rounded-lg active:scale-95 transition-all ${
+            aria-label="Zoom In"
+            className={`p-1 sm:p-1.5 rounded-lg active:scale-95 transition-all ${
               isLight
                 ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-[#EBE6DD]"
                 : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
@@ -296,7 +298,7 @@ const CanvasHUD: React.FC<{
 
         {/* Separator */}
         <div
-          className={`w-[1px] h-4 mx-0.5 ${
+          className={`w-[1px] h-4 mx-0.5 shrink-0 ${
             isLight ? "bg-[#E7E2D8]" : "bg-slate-800"
           }`}
         />
@@ -306,7 +308,8 @@ const CanvasHUD: React.FC<{
           type="button"
           onClick={() => fitView({ padding: 0.25, duration: 250 })}
           title="Fit View to Screen"
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium active:scale-95 border transition-all ${
+          aria-label="Fit View to Screen"
+          className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-xs font-medium active:scale-95 border transition-all shrink-0 ${
             isLight
               ? "text-[#443E3A] hover:text-[#2C2724] hover:bg-[#EBE6DD] border-transparent hover:border-[#D9D1C5]"
               : "text-slate-300 hover:text-white hover:bg-slate-800/90 border-transparent hover:border-slate-700/60"
@@ -325,7 +328,8 @@ const CanvasHUD: React.FC<{
           type="button"
           onClick={onCycleGrid}
           title={`Grid: ${getGridLabel()} (Click to cycle)`}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium active:scale-95 border transition-all ${
+          aria-label={`Grid: ${getGridLabel()}`}
+          className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-xs font-medium active:scale-95 border transition-all shrink-0 ${
             isLight
               ? "text-[#443E3A] hover:text-[#2C2724] hover:bg-[#EBE6DD] border-transparent hover:border-[#D9D1C5]"
               : "text-slate-300 hover:text-white hover:bg-slate-800/90 border-transparent hover:border-slate-700/60"
@@ -350,7 +354,8 @@ const CanvasHUD: React.FC<{
           type="button"
           onClick={onToggleMiniMap}
           title={isMiniMapOpen ? "Hide MiniMap" : "Show MiniMap"}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium active:scale-95 border transition-all ${
+          aria-label="Toggle MiniMap"
+          className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-xs font-medium active:scale-95 border transition-all shrink-0 ${
             isMiniMapOpen
               ? isLight
                 ? "bg-amber-500/10 text-amber-800 border-amber-500/30 shadow-sm"
@@ -369,7 +374,8 @@ const CanvasHUD: React.FC<{
           type="button"
           onClick={onToggleLock}
           title={isLocked ? "Unlock Canvas Dragging" : "Lock Canvas (View Only)"}
-          className={`p-1.5 rounded-xl text-xs active:scale-95 border transition-all ${
+          aria-label={isLocked ? "Unlock Canvas" : "Lock Canvas"}
+          className={`p-1 sm:p-1.5 rounded-xl text-xs active:scale-95 border transition-all shrink-0 ${
             isLocked
               ? isLight
                 ? "bg-amber-500/10 text-amber-800 border-amber-500/30 shadow-sm"
@@ -384,14 +390,14 @@ const CanvasHUD: React.FC<{
 
         {/* Separator */}
         <div
-          className={`w-[1px] h-4 mx-0.5 ${
+          className={`w-[1px] h-4 mx-0.5 shrink-0 hidden sm:block ${
             isLight ? "bg-[#E7E2D8]" : "bg-slate-800"
           }`}
         />
 
-        {/* Stats Pill */}
+        {/* Stats Pill - compact / hidden on extra small */}
         <div
-          className={`flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono rounded-xl border ${
+          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono rounded-xl border shrink-0 ${
             isLight
               ? "text-[#7A7269] bg-[#F5F2EB] border-[#E7E2D8]"
               : "text-slate-400 bg-slate-900/60 border-slate-800/60"
@@ -486,8 +492,52 @@ export const FlowCanvas: React.FC = () => {
 
   // Canvas View & Grid States
   const [gridVariant, setGridVariant] = useState<BackgroundVariant | null>(BackgroundVariant.Dots);
-  const [isMiniMapOpen, setIsMiniMapOpen] = useState(true);
+  const [isMiniMapOpen, setIsMiniMapOpen] = useState(() => (typeof window !== "undefined" ? window.innerWidth >= 768 : true));
   const [isLocked, setIsLocked] = useState(false);
+
+  // Touch long-press handling for mobile context menu
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length !== 1) {
+        if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+        return;
+      }
+      const touch = e.touches[0];
+      touchStartPosRef.current = { x: touch.clientX, y: touch.clientY };
+      touchTimerRef.current = setTimeout(() => {
+        const flowPos = screenToFlowPosition({
+          x: touch.clientX,
+          y: touch.clientY,
+        });
+        setIsChangeTypeSubmenuOpen(false);
+        setContextMenu({
+          type: "pane",
+          x: touch.clientX,
+          y: touch.clientY,
+          flowPosition: flowPos,
+        });
+      }, 550);
+    },
+    [screenToFlowPosition]
+  );
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartPosRef.current) return;
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartPosRef.current.x);
+    const dy = Math.abs(touch.clientY - touchStartPosRef.current.y);
+    if (dx > 12 || dy > 12) {
+      if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+    touchStartPosRef.current = null;
+  }, []);
 
   const cycleGrid = useCallback(() => {
     setGridVariant((prev) => {
@@ -595,10 +645,10 @@ export const FlowCanvas: React.FC = () => {
     const rect = reactFlowWrapper.current.getBoundingClientRect();
     const rawX = contextMenu.x - rect.left;
     const rawY = contextMenu.y - rect.top;
-    const width = contextMenu.type === "pane" ? 280 : 220;
-    const height = contextMenu.type === "pane" ? 380 : 200;
-    const x = Math.max(12, Math.min(rawX, rect.width - width - 12));
-    const y = Math.max(12, Math.min(rawY, rect.height - height - 12));
+    const width = contextMenu.type === "pane" ? Math.min(280, rect.width - 24) : Math.min(220, rect.width - 24);
+    const height = contextMenu.type === "pane" ? Math.min(380, rect.height - 24) : Math.min(240, rect.height - 24);
+    const x = Math.max(8, Math.min(rawX, rect.width - width - 8));
+    const y = Math.max(8, Math.min(rawY, rect.height - height - 8));
     return { x, y };
   }, [contextMenu]);
 
@@ -684,6 +734,9 @@ export const FlowCanvas: React.FC = () => {
         isLight ? "bg-[#F5F2EB]" : "bg-[#080c14]"
       }`}
       onKeyDown={handleKeyDown}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       tabIndex={0}
     >
       <ReactFlow
@@ -758,7 +811,7 @@ export const FlowCanvas: React.FC = () => {
 
         {/* Sleek MiniMap Panel */}
         {isMiniMapOpen && (
-          <Panel position="bottom-right" className="!mb-14 !mr-4">
+          <Panel position="bottom-right" className="!mb-14 !mr-2 sm:!mr-4">
             <div
               className={`rounded-2xl backdrop-blur-md border overflow-hidden transition-all duration-200 ${
                 isLight
@@ -768,7 +821,7 @@ export const FlowCanvas: React.FC = () => {
             >
               {/* MiniMap Header Bar */}
               <div
-                className={`flex items-center justify-between px-3 py-2 border-b text-[10px] font-mono ${
+                className={`flex items-center justify-between px-2.5 sm:px-3 py-1.5 sm:py-2 border-b text-[9px] sm:text-[10px] font-mono ${
                   isLight
                     ? "border-[#E7E2D8] bg-[#F5F2EB]/90 text-[#7A7269]"
                     : "border-slate-800/70 bg-slate-900/40 text-slate-400"
@@ -791,7 +844,7 @@ export const FlowCanvas: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsMiniMapOpen(false)}
-                  className={`p-0.5 rounded transition-colors ${
+                  className={`p-1 rounded transition-colors ${
                     isLight
                       ? "text-[#7A7269] hover:text-[#2C2724]"
                       : "text-slate-500 hover:text-slate-300"
@@ -810,7 +863,7 @@ export const FlowCanvas: React.FC = () => {
                 nodeBorderRadius={4}
                 zoomable
                 pannable
-                className="!relative !m-0 !bg-transparent !border-0 !w-[180px] !h-[120px]"
+                className="!relative !m-0 !bg-transparent !border-0 !w-[130px] !h-[90px] sm:!w-[180px] sm:!h-[120px]"
                 maskColor={
                   isLight
                     ? "rgba(245, 242, 235, 0.8)"
@@ -825,22 +878,22 @@ export const FlowCanvas: React.FC = () => {
 
         {/* Empty Canvas Quick Guide Overlay */}
         {nodes.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 px-4">
             <div
-              className={`text-center p-8 rounded-3xl backdrop-blur-md border shadow-2xl max-w-sm pointer-events-auto space-y-4 ${
+              className={`text-center p-5 sm:p-8 rounded-2xl sm:rounded-3xl backdrop-blur-md border shadow-2xl max-w-xs sm:max-w-sm w-full pointer-events-auto space-y-3 sm:space-y-4 ${
                 isLight
                   ? "bg-[#FAF8F5]/90 border-[#E7E2D8] shadow-[0_12px_36px_rgba(180,165,145,0.25)]"
                   : "bg-[#0c1220]/80 border-slate-800/80 shadow-2xl"
               }`}
             >
               <div
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto border ${
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center mx-auto border ${
                   isLight
                     ? "bg-amber-500/10 border-amber-500/20 text-amber-600 shadow-[0_0_20px_rgba(217,119,6,0.2)]"
                     : "bg-sky-500/10 border-sky-500/20 text-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.2)]"
                 }`}
               >
-                <Layers className="w-6 h-6" />
+                <Layers className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div className="space-y-1">
                 <h3
@@ -861,7 +914,7 @@ export const FlowCanvas: React.FC = () => {
               <button
                 type="button"
                 onClick={() => addNode("trigger", { x: 300, y: 200 })}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs shadow-lg transition-all active:scale-95 ${
+                className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium text-xs shadow-lg transition-all active:scale-95 min-h-[40px] w-full sm:w-auto ${
                   isLight
                     ? "bg-amber-600 hover:bg-amber-500 text-white shadow-amber-600/20"
                     : "bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-sky-500/20"
@@ -883,7 +936,7 @@ export const FlowCanvas: React.FC = () => {
       {contextMenu && (
         <div
           id="flow-canvas-context-menu"
-          className={`absolute z-50 rounded-2xl backdrop-blur-md border shadow-2xl transition-all duration-150 animate-in fade-in zoom-in-95 ${
+          className={`absolute z-50 rounded-2xl backdrop-blur-md border shadow-2xl transition-all duration-150 animate-in fade-in zoom-in-95 max-w-[calc(100vw-24px)] ${
             contextMenu.type === "pane" ? "w-[280px]" : "w-[220px]"
           } ${
             isLight
@@ -1062,8 +1115,10 @@ export const FlowCanvas: React.FC = () => {
                 {/* Change Type Submenu Flyout */}
                 {isChangeTypeSubmenuOpen && (
                   <div
-                    className={`absolute top-0 w-60 p-1.5 rounded-2xl backdrop-blur-md border shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 ${
-                      isSubmenuLeft ? "right-full mr-1.5" : "left-full ml-1.5"
+                    className={`absolute w-60 max-w-[calc(100vw-36px)] p-1.5 rounded-2xl backdrop-blur-md border shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 ${
+                      isSubmenuLeft
+                        ? "right-0 sm:right-full sm:mr-1.5 top-full sm:top-0 mt-1 sm:mt-0"
+                        : "left-0 sm:left-full sm:ml-1.5 top-full sm:top-0 mt-1 sm:mt-0"
                     } ${
                       isLight
                         ? "bg-[#FAF8F5]/98 border-[#E7E2D8] shadow-[0_16px_40px_rgba(180,165,145,0.4)]"

@@ -1,8 +1,8 @@
-// LandingFooter.tsx: Clean footer with brand badge, navigation links, and runtime status
+// LandingFooter.tsx: Clean responsive footer with brand badge, navigation links, and runtime status
 // Importers/Callers: src/components/landing/LandingPage.tsx
 // Affected API: LandingFooter: React.FC
 // Data Schema: Component Props ({})
-// User Instruction: "I want to create landing page for my ai flow project. using three js. plant it using proper agents and skills" + "refereces are here https://getdesign.md/design-md?page=2"
+// User Instruction: "Make the entire Landing Page fully responsive and touch-optimized on mobile devices"
 
 import React from "react";
 import { Cpu } from "lucide-react";
@@ -12,25 +12,25 @@ export const LandingFooter: React.FC = () => {
   const setView = useViewStore((state) => state.setView);
 
   return (
-    <footer className="bg-stone-100 dark:bg-[#04070e] border-t border-stone-200 dark:border-slate-900 py-12 relative z-10 text-slate-600 dark:text-slate-400">
+    <footer className="bg-stone-100 dark:bg-[#04070e] border-t border-stone-200 dark:border-slate-900 py-10 sm:py-12 relative z-10 text-slate-600 dark:text-slate-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* Brand Col */}
-          <div className="md:col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 p-[1px]">
+          <div className="sm:col-span-2 space-y-3 sm:space-y-4">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 p-[1px] flex-shrink-0">
                 <div className="w-full h-full bg-white dark:bg-slate-950 rounded-[7px] flex items-center justify-center">
                   <Cpu className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
                 </div>
               </div>
-              <span className="text-base font-bold text-slate-900 dark:text-white font-sans">
+              <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white font-sans">
                 AI FLOW <span className="text-cyan-600 dark:text-cyan-400">STUDIO</span>
               </span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
               Production-grade visual DAG canvas for multi-agent LLM orchestration. Deterministic execution, dynamic variable interpolation, and Three.js 3D telemetry.
             </p>
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-1">
               <a
                 href="https://github.com"
                 target="_blank"
@@ -57,7 +57,7 @@ export const LandingFooter: React.FC = () => {
           </div>
 
           {/* Navigation Col */}
-          <div className="space-y-3 text-xs">
+          <div className="space-y-2.5 sm:space-y-3 text-xs">
             <h5 className="font-mono uppercase font-semibold text-slate-900 dark:text-white tracking-wider">
               Navigation
             </h5>
@@ -86,7 +86,7 @@ export const LandingFooter: React.FC = () => {
           </div>
 
           {/* Studio Col */}
-          <div className="space-y-3 text-xs">
+          <div className="space-y-2.5 sm:space-y-3 text-xs">
             <h5 className="font-mono uppercase font-semibold text-slate-900 dark:text-white tracking-wider">
               Studio
             </h5>
@@ -100,7 +100,7 @@ export const LandingFooter: React.FC = () => {
                 </button>
               </li>
               <li>
-                <span className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1.5 font-mono">
+                <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 font-mono">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
                   Three.js WebGL Active
                 </span>
@@ -113,7 +113,7 @@ export const LandingFooter: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-stone-200 dark:border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
+        <div className="pt-6 sm:pt-8 border-t border-stone-200 dark:border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-[11px] sm:text-xs font-mono text-slate-500 text-center sm:text-left">
           <p>© {new Date().getFullYear()} AI Flow Studio. All rights reserved.</p>
           <p className="flex items-center gap-2">
             <span>Built with React, Three.js & Tailwind CSS</span>

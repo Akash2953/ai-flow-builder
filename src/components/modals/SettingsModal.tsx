@@ -19,6 +19,8 @@ import {
   Sun,
   Moon,
   Palette,
+  Globe2,
+  Sparkles,
 } from "lucide-react";
 import { useSettingsStore, ApiKeys } from "../../store/useSettingsStore";
 
@@ -37,6 +39,7 @@ interface ProviderFieldConfig {
   badge?: string;
   badgeColor?: string;
   lightBadgeColor?: string;
+  iconType?: "zap" | "cpu" | "globe" | "sparkles";
 }
 
 const PROVIDER_FIELDS: ProviderFieldConfig[] = [
@@ -49,6 +52,7 @@ const PROVIDER_FIELDS: ProviderFieldConfig[] = [
     badge: "Cloud",
     badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
     lightBadgeColor: "text-emerald-700 bg-emerald-500/10 border-emerald-500/30",
+    iconType: "zap",
   },
   {
     key: "anthropic",
@@ -59,6 +63,7 @@ const PROVIDER_FIELDS: ProviderFieldConfig[] = [
     badge: "Cloud",
     badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
     lightBadgeColor: "text-amber-700 bg-amber-500/10 border-amber-500/30",
+    iconType: "zap",
   },
   {
     key: "gemini",
@@ -69,6 +74,7 @@ const PROVIDER_FIELDS: ProviderFieldConfig[] = [
     badge: "Cloud",
     badgeColor: "text-sky-400 bg-sky-500/10 border-sky-500/20",
     lightBadgeColor: "text-sky-700 bg-sky-500/10 border-sky-500/30",
+    iconType: "zap",
   },
   {
     key: "groq",
@@ -79,6 +85,29 @@ const PROVIDER_FIELDS: ProviderFieldConfig[] = [
     badge: "Fast",
     badgeColor: "text-purple-400 bg-purple-500/10 border-purple-500/20",
     lightBadgeColor: "text-purple-700 bg-purple-500/10 border-purple-500/30",
+    iconType: "zap",
+  },
+  {
+    key: "openrouter",
+    label: "OpenRouter API Key",
+    placeholder: "sk-or-v1-...",
+    docsUrl: "https://openrouter.ai/keys",
+    description: "Unified gateway routing to 100+ open and proprietary models.",
+    badge: "Gateway",
+    badgeColor: "text-rose-400 bg-rose-500/10 border-rose-500/20",
+    lightBadgeColor: "text-rose-700 bg-rose-500/10 border-rose-500/30",
+    iconType: "globe",
+  },
+  {
+    key: "deepseek",
+    label: "DeepSeek API Key",
+    placeholder: "sk-...",
+    docsUrl: "https://platform.deepseek.com/api_keys",
+    description: "Powers DeepSeek-V3 and DeepSeek-R1 reasoning models.",
+    badge: "Reasoning",
+    badgeColor: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+    lightBadgeColor: "text-cyan-700 bg-cyan-500/10 border-cyan-500/30",
+    iconType: "sparkles",
   },
   {
     key: "ollamaUrl",
@@ -88,8 +117,9 @@ const PROVIDER_FIELDS: ProviderFieldConfig[] = [
     isUrl: true,
     description: "Local open-source models without cloud keys or external data transfer.",
     badge: "Local",
-    badgeColor: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
-    lightBadgeColor: "text-cyan-700 bg-cyan-500/10 border-cyan-500/30",
+    badgeColor: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    lightBadgeColor: "text-blue-700 bg-blue-500/10 border-blue-500/30",
+    iconType: "cpu",
   },
 ];
 
@@ -113,9 +143,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setVisibleKeys((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const renderFieldIcon = (field: ProviderFieldConfig) => {
+    if (field.isUrl || field.iconType === "cpu") {
+      return (
+        <Cpu
+          className={`w-3.5 h-3.5 shrink-0 ${
+            isLight ? "text-purple-600" : "text-purple-400"
+          }`}
+        />
+      );
+    }
+    if (field.iconType === "globe") {
+      return (
+        <Globe2
+          className={`w-3.5 h-3.5 shrink-0 ${
+            isLight ? "text-rose-600" : "text-rose-400"
+          }`}
+        />
+      );
+    }
+    if (field.iconType === "sparkles") {
+      return (
+        <Sparkles
+          className={`w-3.5 h-3.5 shrink-0 ${
+            isLight ? "text-cyan-600" : "text-cyan-400"
+          }`}
+        />
+      );
+    }
+    return (
+      <Zap
+        className={`w-3.5 h-3.5 shrink-0 ${
+          isLight ? "text-amber-600" : "text-sky-400"
+        }`}
+      />
+    );
+  };
+
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn select-none ${
+      className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-md animate-fadeIn select-none ${
         isLight ? "bg-[#2C2724]/40" : "bg-slate-950/85"
       }`}
       onClick={(e) => {
@@ -123,7 +190,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       }}
     >
       <div
-        className={`w-full max-w-xl rounded-2xl overflow-hidden flex flex-col max-h-[90vh] relative border transition-all duration-200 ${
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-modal-title"
+        className={`w-[calc(100vw-24px)] sm:max-w-2xl max-h-[90vh] sm:max-h-[85vh] mx-auto rounded-2xl overflow-hidden flex flex-col relative border transition-all duration-200 ${
           isLight
             ? "bg-[#FAF8F5] border-[#E7E2D8] text-[#2C2724] shadow-[0_20px_60px_rgba(180,165,145,0.3)]"
             : "bg-[#080d18] border-slate-800/90 text-slate-100 shadow-[0_20px_60px_rgba(0,0,0,0.8)]"
@@ -140,15 +210,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Modal Header */}
         <div
-          className={`px-6 py-4 border-b flex items-center justify-between backdrop-blur-sm ${
+          className={`px-4 sm:px-6 py-3.5 sm:py-4 border-b flex items-center justify-between backdrop-blur-sm shrink-0 ${
             isLight
-              ? "bg-[#FAF8F5]/90 border-[#E7E2D8]"
-              : "bg-[#080d18]/90 border-slate-800/70"
+              ? "bg-[#FAF8F5]/95 border-[#E7E2D8]"
+              : "bg-[#080d18]/95 border-slate-800/70"
           }`}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center border shadow-sm ${
+              className={`w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center border shadow-sm shrink-0 ${
                 isLight
                   ? "bg-amber-500/10 border-amber-500/25 text-amber-700"
                   : "bg-sky-500/10 border-sky-500/25 text-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.15)]"
@@ -156,16 +226,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             >
               <Key className="w-4 h-4" strokeWidth={2.2} />
             </div>
-            <div>
+            <div className="min-w-0">
               <h2
-                className={`text-sm font-semibold flex items-center gap-2 ${
+                id="settings-modal-title"
+                className={`text-xs sm:text-sm font-semibold truncate ${
                   isLight ? "text-[#2C2724]" : "text-slate-100"
                 }`}
               >
                 Engine & Provider Settings
               </h2>
               <p
-                className={`text-[11px] ${
+                className={`text-[10px] sm:text-[11px] truncate ${
                   isLight ? "text-[#7A7269]" : "text-slate-400"
                 }`}
               >
@@ -178,7 +249,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close Settings"
-            className={`p-1.5 rounded-lg active:scale-95 transition-all ${
+            className={`p-2 rounded-lg active:scale-95 transition-all min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0 touch-manipulation ${
               isLight
                 ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-[#EBE6DD]"
                 : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/80"
@@ -189,19 +260,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-5 custom-scrollbar">
+        <div
+          className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 custom-scrollbar flex-1 overscroll-contain"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
           {/* Theme Selector Control */}
           <div
-            className={`p-4 rounded-xl border flex items-center justify-between gap-4 shadow-sm ${
+            className={`p-3.5 sm:p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shadow-sm ${
               isLight
                 ? "bg-[#F5F2EB] border-[#E7E2D8]"
                 : "bg-gradient-to-br from-[#0c1220] to-[#080d18] border-slate-800/80"
             }`}
           >
-            <div className="space-y-1">
+            <div className="space-y-0.5 sm:space-y-1">
               <div className="flex items-center gap-2">
                 <Palette
-                  className={`w-4 h-4 ${
+                  className={`w-4 h-4 shrink-0 ${
                     isLight ? "text-amber-600" : "text-sky-400"
                   }`}
                 />
@@ -214,7 +288,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </span>
               </div>
               <p
-                className={`text-xs leading-relaxed max-w-sm ${
+                className={`text-[11px] sm:text-xs leading-relaxed max-w-sm ${
                   isLight ? "text-[#7A7269]" : "text-slate-400"
                 }`}
               >
@@ -224,7 +298,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {/* Theme Segmented Switch */}
             <div
-              className={`flex items-center p-1 rounded-xl border ${
+              className={`flex items-center p-1 rounded-xl border self-start sm:self-auto shrink-0 ${
                 isLight
                   ? "bg-[#FAF8F5] border-[#E7E2D8] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
                   : "bg-[#060a12] border-slate-800"
@@ -233,25 +307,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <button
                 type="button"
                 onClick={() => setTheme("light")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all min-h-[34px] active:scale-95 touch-manipulation ${
                   isLight
                     ? "bg-[#EBE6DD] text-[#2C2724] border border-[#D4CEB8] shadow-sm font-semibold"
                     : "text-slate-400 hover:text-slate-200"
                 }`}
               >
-                <Sun className="w-3.5 h-3.5 text-amber-600" />
+                <Sun className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                 <span>Light</span>
               </button>
               <button
                 type="button"
                 onClick={() => setTheme("dark")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all min-h-[34px] active:scale-95 touch-manipulation ${
                   !isLight
                     ? "bg-slate-800 text-slate-100 border border-slate-700/60 shadow-sm font-semibold"
                     : "text-[#7A7269] hover:text-[#2C2724]"
                 }`}
               >
-                <Moon className="w-3.5 h-3.5 text-indigo-400" />
+                <Moon className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                 <span>Dark</span>
               </button>
             </div>
@@ -259,13 +333,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Mock Simulation Toggle Box */}
           <div
-            className={`p-4 rounded-xl border flex items-start justify-between gap-4 shadow-sm ${
+            className={`p-3.5 sm:p-4 rounded-xl border flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 shadow-sm ${
               isLight
                 ? "bg-[#F5F2EB] border-[#E7E2D8]"
                 : "bg-gradient-to-br from-[#0c1220] to-[#080d18] border-slate-800/80"
             }`}
           >
-            <div className="space-y-1">
+            <div className="space-y-0.5 sm:space-y-1">
               <div className="flex items-center gap-2">
                 <span
                   className={`text-xs font-semibold ${
@@ -285,7 +359,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </span>
               </div>
               <p
-                className={`text-xs leading-relaxed max-w-sm ${
+                className={`text-[11px] sm:text-xs leading-relaxed max-w-sm ${
                   isLight ? "text-[#7A7269]" : "text-slate-400"
                 }`}
               >
@@ -293,7 +367,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </p>
             </div>
 
-            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+            <label className="relative inline-flex items-center cursor-pointer shrink-0 p-1 -m-1 touch-manipulation self-start sm:self-auto">
               <input
                 type="checkbox"
                 checked={mockMode}
@@ -301,7 +375,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 className="sr-only peer"
               />
               <div
-                className={`w-11 h-6 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all shadow-inner ${
+                className={`w-11 h-6 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[6px] after:left-[6px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all shadow-inner ${
                   isLight
                     ? "bg-[#E0DACF] peer-checked:bg-amber-600"
                     : "bg-slate-800/90 peer-checked:bg-sky-500"
@@ -311,10 +385,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           {/* Provider API Keys List */}
-          <div className="space-y-3.5">
-            <div className="flex items-center justify-between">
+          <div className="space-y-3 sm:space-y-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
               <h3
-                className={`text-[11px] font-mono uppercase tracking-wider flex items-center gap-1.5 ${
+                className={`text-[10px] sm:text-[11px] font-mono uppercase tracking-wider flex items-center gap-1.5 ${
                   isLight ? "text-[#7A7269]" : "text-slate-400"
                 }`}
               >
@@ -326,7 +400,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 API Provider Keys
               </h3>
               <div
-                className={`flex items-center gap-1.5 text-[11px] font-mono ${
+                className={`flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono ${
                   isLight ? "text-[#7A7269]" : "text-slate-500"
                 }`}
               >
@@ -348,31 +422,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 return (
                   <div
                     key={field.key}
-                    className={`p-3.5 rounded-xl border space-y-2 transition-all ${
+                    className={`p-3 sm:p-3.5 rounded-xl border space-y-2 transition-all ${
                       isLight
                         ? "bg-[#F5F2EB] border-[#E7E2D8] hover:border-[#D4CEB8]"
                         : "bg-[#060a12]/80 border-slate-800/80 hover:border-slate-700/80"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-1.5">
                       <label
-                        className={`text-xs font-medium flex items-center gap-2 ${
+                        className={`text-xs font-medium flex items-center gap-1.5 sm:gap-2 flex-wrap ${
                           isLight ? "text-[#2C2724]" : "text-slate-200"
                         }`}
                       >
-                        {field.isUrl ? (
-                          <Cpu
-                            className={`w-3.5 h-3.5 ${
-                              isLight ? "text-purple-600" : "text-purple-400"
-                            }`}
-                          />
-                        ) : (
-                          <Zap
-                            className={`w-3.5 h-3.5 ${
-                              isLight ? "text-amber-600" : "text-sky-400"
-                            }`}
-                          />
-                        )}
+                        {renderFieldIcon(field)}
                         <span>{field.label}</span>
                         {field.badge && (
                           <span
@@ -392,6 +454,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]"
                                 : "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"
                             }`}
+                            title="Key configured"
                           />
                         )}
                       </label>
@@ -399,7 +462,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         href={field.docsUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className={`text-[11px] flex items-center gap-1 transition-colors font-medium ${
+                        className={`text-[11px] flex items-center gap-1 transition-colors font-medium touch-manipulation py-0.5 ${
                           isLight
                             ? "text-amber-700 hover:text-amber-800"
                             : "text-sky-400 hover:text-sky-300"
@@ -416,7 +479,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         value={value}
                         onChange={(e) => setApiKey(field.key, e.target.value)}
                         placeholder={field.placeholder}
-                        className={`w-full rounded-lg px-3 py-1.5 text-xs font-mono pr-9 transition-all ${
+                        className={`w-full rounded-lg px-3 py-2 sm:py-1.5 text-xs font-mono min-h-[38px] pr-10 transition-all ${
                           isLight
                             ? "bg-[#FAF8F5] border border-[#E7E2D8] text-[#2C2724] placeholder-[#9C9287] focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 shadow-inner"
                             : "bg-[#080d18] border border-slate-800 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-sky-500/80 focus:ring-1 focus:ring-sky-500/50"
@@ -427,7 +490,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <button
                           type="button"
                           onClick={() => toggleVisibility(field.key)}
-                          className={`absolute right-2.5 p-1 transition-colors ${
+                          className={`absolute right-1 top-1/2 -translate-y-1/2 p-2 min-h-[36px] min-w-[36px] flex items-center justify-center transition-colors rounded-md active:scale-95 touch-manipulation ${
                             isLight
                               ? "text-[#9C9287] hover:text-[#443E3A]"
                               : "text-slate-500 hover:text-slate-300"
@@ -445,7 +508,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
 
                     <p
-                      className={`text-[11px] leading-normal ${
+                      className={`text-[10px] sm:text-[11px] leading-normal ${
                         isLight ? "text-[#7A7269]" : "text-slate-500"
                       }`}
                     >
@@ -460,25 +523,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Modal Footer */}
         <div
-          className={`px-6 py-3.5 border-t flex items-center justify-between ${
+          className={`px-4 sm:px-6 py-3 sm:py-3.5 border-t flex items-center justify-between shrink-0 ${
             isLight
-              ? "bg-[#FAF8F5]/90 border-[#E7E2D8]"
-              : "bg-[#080d18]/90 border-slate-800/80"
+              ? "bg-[#FAF8F5]/95 border-[#E7E2D8]"
+              : "bg-[#080d18]/95 border-slate-800/80"
           }`}
         >
           <div
-            className={`flex items-center gap-1.5 text-xs font-mono ${
+            className={`flex items-center gap-1.5 text-[11px] sm:text-xs font-mono ${
               isLight ? "text-emerald-700" : "text-emerald-400"
             }`}
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Settings synced locally</span>
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Settings synced locally</span>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className={`px-4 py-1.5 rounded-xl text-xs font-semibold shadow-md active:scale-95 transition-all ${
+            className={`px-5 py-2 sm:py-1.5 rounded-xl text-xs font-semibold shadow-md active:scale-95 transition-all min-h-[38px] sm:min-h-[34px] flex items-center justify-center touch-manipulation ${
               isLight
                 ? "bg-[#2C2724] hover:bg-[#443E3A] text-[#FAF8F5]"
                 : "bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-sky-500/20"
