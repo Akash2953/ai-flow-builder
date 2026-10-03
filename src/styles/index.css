@@ -1,7 +1,7 @@
 /* index.css: Global styles, design tokens, and React Flow dual-theme overrides */
 /* Importers/Callers: src/main.tsx */
 /* Affected API: Tailwind base/components/utilities, React Flow handles, edges, background, minimap, controls, scrollbars */
-/* Redesign: Taste-Skill premium developer tool aesthetics with Dual-Theme Tactile Soft-Clay Neumorphic Light & Linear Dark styling */
+/* Design System: Plus Jakarta Sans / JetBrains Mono, Refined Obsidian Dark (#090D16), Warm Tactile Soft-Clay (#FAF8F5) */
 
 @import "@xyflow/react/dist/style.css";
 
@@ -10,8 +10,12 @@
 @tailwind utilities;
 
 :root {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color-scheme: dark;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 :root[data-theme="light"],
@@ -23,23 +27,29 @@ code, pre, .font-mono {
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Custom sleek scrollbar */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------
+   Custom Sleek Scrollbar (Pure #000000 Avoidance)
+   ------------------------------------------------------------- */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #080d18;
+  background: #090D16;
 }
 html.light ::-webkit-scrollbar-track,
 [data-theme="light"] ::-webkit-scrollbar-track {
-  background: #F5F2EB;
+  background: #FAF8F5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 4px;
+  background: #1E293B;
+  border-radius: 6px;
 }
 html.light ::-webkit-scrollbar-thumb,
 [data-theme="light"] ::-webkit-scrollbar-thumb {
@@ -55,15 +65,26 @@ html.light ::-webkit-scrollbar-thumb:hover,
 }
 
 /* -------------------------------------------------------------
+   Subtle Glass Border Utility Classes
+   ------------------------------------------------------------- */
+.glass-border-dark {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-border-light {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* -------------------------------------------------------------
    React Flow Canvas Overrides & High-End Aesthetic Styling
    ------------------------------------------------------------- */
 
 .react-flow__background {
-  background-color: #080d18 !important;
+  background-color: #090D16 !important;
 }
 html.light .react-flow__background,
 [data-theme="light"] .react-flow__background {
-  background-color: #F5F2EB !important;
+  background-color: #FAF8F5 !important;
 }
 
 /* Disable harsh default focus outlines and backgrounds on nodes */
@@ -93,14 +114,14 @@ html.light .react-flow__background,
 
 /* Multi-selection marquee box */
 .react-flow__selection {
-  background: rgba(56, 189, 248, 0.08) !important;
-  border: 1px dashed rgba(56, 189, 248, 0.5) !important;
+  background: rgba(14, 165, 233, 0.08) !important;
+  border: 1px dashed rgba(56, 189, 248, 0.55) !important;
   border-radius: 8px !important;
 }
 html.light .react-flow__selection,
 [data-theme="light"] .react-flow__selection {
   background: rgba(217, 119, 6, 0.08) !important;
-  border: 1px dashed rgba(217, 119, 6, 0.5) !important;
+  border: 1px dashed rgba(217, 119, 6, 0.55) !important;
 }
 
 /* Precision Node Handles */
@@ -108,16 +129,31 @@ html.light .react-flow__selection,
   width: 10px !important;
   height: 10px !important;
   border-radius: 50% !important;
-  border: 2px solid #080d18 !important;
+  border: 2px solid #090D16 !important;
   background-color: #38bdf8 !important;
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35) !important;
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease, box-shadow 0.15s ease !important;
+  z-index: 10 !important;
+}
+
+/* Invisible 24px touch/click target for effortless dragging */
+.react-flow__handle::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  right: -7px;
+  bottom: -7px;
+  border-radius: 50%;
+  background: transparent;
+  cursor: crosshair;
 }
 
 html.light .react-flow__handle,
 [data-theme="light"] .react-flow__handle {
   border: 2px solid #FAF8F5 !important;
-  box-shadow: 0 0 0 1px rgba(180, 165, 145, 0.4) !important;
+  background-color: #d97706 !important;
+  box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.35) !important;
 }
 
 .react-flow__handle:hover {
@@ -126,13 +162,13 @@ html.light .react-flow__handle,
 }
 html.light .react-flow__handle:hover,
 [data-theme="light"] .react-flow__handle:hover {
-  box-shadow: 0 0 12px rgba(217, 119, 6, 0.6), 0 0 0 2px rgba(217, 119, 6, 0.3) !important;
+  box-shadow: 0 0 12px rgba(217, 119, 6, 0.7), 0 0 0 2px rgba(217, 119, 6, 0.35) !important;
 }
 
 /* Condition Node Branch Handles */
 .react-flow__handle.source-condition-true {
   background-color: #10b981 !important;
-  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.3) !important;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.35) !important;
 }
 .react-flow__handle.source-condition-true:hover {
   box-shadow: 0 0 12px rgba(16, 185, 129, 0.8), 0 0 0 2px rgba(16, 185, 129, 0.4) !important;
@@ -140,7 +176,7 @@ html.light .react-flow__handle:hover,
 
 .react-flow__handle.source-condition-false {
   background-color: #f43f5e !important;
-  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.3) !important;
+  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.35) !important;
 }
 .react-flow__handle.source-condition-false:hover {
   box-shadow: 0 0 12px rgba(244, 63, 94, 0.8), 0 0 0 2px rgba(244, 63, 94, 0.4) !important;
@@ -148,13 +184,13 @@ html.light .react-flow__handle:hover,
 
 /* React Flow Connection Edges */
 .react-flow__edge-path {
-  stroke: #334155 !important;
+  stroke: #273553 !important;
   stroke-width: 2 !important;
   transition: stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease;
 }
 html.light .react-flow__edge-path,
 [data-theme="light"] .react-flow__edge-path {
-  stroke: #C8BEB2 !important;
+  stroke: #D4CEB8 !important;
 }
 
 .react-flow__edge:hover .react-flow__edge-path {
@@ -168,15 +204,39 @@ html.light .react-flow__edge:hover .react-flow__edge-path,
   filter: drop-shadow(0 0 6px rgba(180, 165, 145, 0.4));
 }
 
-.react-flow__edge.selected .react-flow__edge-path {
+.react-flow__edge.selected .react-flow__edge-path,
+.react-flow__edge.selected.animated .react-flow__edge-path {
   stroke: #38bdf8 !important;
-  stroke-width: 2.5 !important;
-  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+  stroke-width: 3 !important;
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.9)) !important;
 }
 html.light .react-flow__edge.selected .react-flow__edge-path,
-[data-theme="light"] .react-flow__edge.selected .react-flow__edge-path {
+[data-theme="light"] .react-flow__edge.selected .react-flow__edge-path,
+html.light .react-flow__edge.selected.animated .react-flow__edge-path,
+[data-theme="light"] .react-flow__edge.selected.animated .react-flow__edge-path {
   stroke: #D97706 !important;
-  filter: drop-shadow(0 0 8px rgba(217, 119, 6, 0.5));
+  stroke-width: 3 !important;
+  filter: drop-shadow(0 0 10px rgba(217, 119, 6, 0.8)) !important;
+}
+
+/* React Flow Reconnection Edge Updater Handle */
+.react-flow__edgeupdater {
+  fill: #38bdf8 !important;
+  stroke: #090D16 !important;
+  stroke-width: 2 !important;
+  r: 6 !important;
+  cursor: grab !important;
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8));
+}
+.react-flow__edgeupdater:hover {
+  r: 8 !important;
+  fill: #7dd3fc !important;
+}
+html.light .react-flow__edgeupdater,
+[data-theme="light"] .react-flow__edgeupdater {
+  fill: #D97706 !important;
+  stroke: #FAF8F5 !important;
+  filter: drop-shadow(0 0 6px rgba(217, 119, 6, 0.7));
 }
 
 .react-flow__edge.animated .react-flow__edge-path {
@@ -208,47 +268,58 @@ html.light .react-flow__connection-path,
 
 /* React Flow Controls overrides */
 .react-flow__controls {
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 4px 20px -2px rgba(5, 10, 24, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
   border-radius: 12px !important;
   overflow: hidden !important;
-  border: 1px solid #1e293b !important;
+  border: 1px solid #1E293B !important;
 }
 .react-flow__controls-button {
-  background: #0c1220 !important;
-  border-bottom: 1px solid #1e293b !important;
-  color: #94a3b8 !important;
-  fill: #94a3b8 !important;
+  background: #0D1322 !important;
+  border-bottom: 1px solid #1E293B !important;
+  color: #94A3B8 !important;
+  fill: #94A3B8 !important;
 }
 .react-flow__controls-button:hover {
-  background: #1e293b !important;
+  background: #161F36 !important;
   color: #38bdf8 !important;
   fill: #38bdf8 !important;
 }
 html.light .react-flow__controls,
 [data-theme="light"] .react-flow__controls {
-  box-shadow: 0 4px 20px -2px rgba(180, 165, 145, 0.22) !important;
-  border: 1px solid #E7E2D8 !important;
+  box-shadow: 0 4px 20px -2px rgba(180, 165, 145, 0.25), 0 1px 3px 0 rgba(140, 125, 105, 0.12) !important;
+  border: 1px solid #E5DECE !important;
 }
 html.light .react-flow__controls-button,
 [data-theme="light"] .react-flow__controls-button {
   background: #FAF8F5 !important;
-  border-bottom: 1px solid #E7E2D8 !important;
-  color: #7A7269 !important;
-  fill: #7A7269 !important;
+  border-bottom: 1px solid #E5DECE !important;
+  color: #6E655F !important;
+  fill: #6E655F !important;
 }
 html.light .react-flow__controls-button:hover,
 [data-theme="light"] .react-flow__controls-button:hover {
-  background: #EBE6DD !important;
+  background: #EFE8DA !important;
   color: #2C2724 !important;
   fill: #2C2724 !important;
 }
 
-/* Custom keyframe dash animation */
+/* -------------------------------------------------------------
+   Custom Keyframe Animations
+   ------------------------------------------------------------- */
 @keyframes react-flow__dash {
   from {
     stroke-dashoffset: 20;
   }
   to {
     stroke-dashoffset: 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
   }
 }

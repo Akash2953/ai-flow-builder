@@ -1,10 +1,10 @@
-// BaseNodeWrapper: Dual-theme container for all React Flow nodes with header, telemetry, hover actions, and error banner
+// BaseNodeWrapper: Dual-theme container for all React Flow nodes with header, telemetry, hover actions, scanning beam, and error banner
 // Importers/Callers: TriggerNode, LLMNode, ConditionNode, TransformNode, HttpRequestNode, OutputNode
 // Affected API: NodeExecutionStatus, useFlowStore (deleteNode, duplicateNode), executeWorkflow, useSettingsStore (theme)
 // Redesign: Taste-Skill premium developer tool aesthetics with Dual-Theme Tactile Soft-Clay Neumorphic Light & Linear Dark styling
 
 import React from "react";
-import { CheckCircle2, AlertCircle, Loader2, Play, Copy, Trash2 } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader2, Play, Copy, Trash2, FastForward } from "lucide-react";
 import { NodeExecutionStatus } from "../../types/flow";
 import { useFlowStore } from "../../store/useFlowStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
@@ -13,21 +13,21 @@ import { executeWorkflow } from "../../engine/dagRunner";
 interface BaseNodeWrapperProps {
   id: string;
   selected?: boolean;
-  title: string;
+  title?: string;
   subtitle?: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   iconBgColor?: string;
   accentColor?: string;
   status?: NodeExecutionStatus;
   executionTimeMs?: number;
   errorMessage?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const BaseNodeWrapper: React.FC<BaseNodeWrapperProps> = ({
   id,
   selected = false,
-  title,
+  title = "Node",
   subtitle,
   icon,
   iconBgColor = "bg-sky-500/10 text-sky-400 border-sky-500/25",
@@ -37,7 +37,8 @@ export const BaseNodeWrapper: React.FC<BaseNodeWrapperProps> = ({
   errorMessage,
   children,
 }) => {
-  const { deleteNode, duplicateNode } = useFlowStore();
+  const deleteNode = useFlowStore((state) => state.deleteNode);
+  const duplicateNode = useFlowStore((state) => state.duplicateNode);
   const theme = useSettingsStore((state) => state.theme);
   const isLight = theme === "light";
 
@@ -88,6 +89,19 @@ export const BaseNodeWrapper: React.FC<BaseNodeWrapperProps> = ({
             <span>{executionTimeMs !== undefined ? `${executionTimeMs}ms` : "DONE"}</span>
           </span>
         );
+      case "skipped":
+        return (
+          <span
+            className={`flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full ${
+              isLight
+                ? "text-stone-600 bg-stone-200/80 border border-stone-300 shadow-sm"
+                : "text-slate-400 bg-slate-800/80 border border-slate-700/60"
+            }`}
+          >
+            <FastForward className="w-3 h-3 text-slate-400" />
+            <span>SKIPPED</span>
+          </span>
+        );
       case "error":
         return (
           <span
@@ -115,9 +129,11 @@ export const BaseNodeWrapper: React.FC<BaseNodeWrapperProps> = ({
               selected
                 ? "border-amber-600/80 ring-2 ring-amber-500/25 shadow-[0_8px_28px_-4px_rgba(217,119,6,0.25)] -translate-y-0.5"
                 : status === "running"
-                ? "border-amber-500/80 ring-2 ring-amber-500/25 shadow-[0_8px_24px_rgba(217,119,6,0.2)] animate-pulse"
+                ? "border-amber-500/80 ring-2 ring-amber-500/25 shadow-[0_8px_24px_rgba(217,119,6,0.2)]"
                 : status === "success"
                 ? "border-emerald-500/60 ring-1 ring-emerald-500/20 shadow-[0_4px_20px_rgba(16,185,129,0.15)]"
+                : status === "skipped"
+                ? "border-stone-300/80 opacity-75"
                 : status === "error"
                 ? "border-rose-500/60 ring-1 ring-rose-500/20 shadow-[0_4px_20px_rgba(244,63,94,0.15)]"
                 : "border-[#E7E2D8] hover:border-[#D9D1C5] hover:shadow-[0_8px_28px_-4px_rgba(180,165,145,0.3)]"
@@ -126,9 +142,11 @@ export const BaseNodeWrapper: React.FC<BaseNodeWrapperProps> = ({
               selected
                 ? "border-sky-500/90 ring-1 ring-sky-400/50 shadow-[0_0_24px_rgba(56,189,248,0.22)] -translate-y-0.5"
                 : status === "running"
-                ? "border-sky-500/80 ring-1 ring-sky-500/30 shadow-[0_0_20px_rgba(56,189,248,0.2)] animate-pulse"
+                ? "border-sky-500/80 ring-1 ring-sky-500/30 shadow-[0_0_20px_rgba(56,189,248,0.2)]"
                 : status === "success"
                 ? "border-emerald-500/60 ring-1 ring-emerald-500/20 shadow-[0_0_16px_rgba(16,185,129,0.15)]"
+                : status === "skipped"
+                ? "border-slate-800/60 opacity-60"
                 : status === "error"
                 ? "border-rose-500/60 ring-1 ring-rose-500/20 shadow-[0_0_16px_rgba(244,63,94,0.15)]"
                 : "border-slate-800/80 hover:border-slate-700/90 hover:shadow-2xl hover:shadow-black/50"
@@ -143,6 +161,13 @@ export const BaseNodeWrapper: React.FC<BaseNodeWrapperProps> = ({
             : "bg-gradient-to-r from-transparent via-slate-500/20 to-transparent"
         }`}
       />
+
+      {/* Active Execution Scanning Beam */}
+      {status === "running" && (
+        <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none z-10">
+          <div className="w-full h-full bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent animate-shimmer" />
+        </div>
+      )}
 
       {/* Card Header */}
       <div

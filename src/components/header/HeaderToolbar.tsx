@@ -1,18 +1,11 @@
-// HeaderToolbar: Top navigation and control bar for workflow orchestration, execution triggers, validation status, templates, settings, theme toggle, and file I/O
+// HeaderToolbar: Clean, uncluttered top bar with interactive brand mark, prominent highlighted workflow name, DAG validation badge, and primary execution trigger
 // Importers/Callers: src/App.tsx
-// Affected API: useFlowStore, useExecutionStore, useSettingsStore, dagRunner (validateWorkflow, executeWorkflow)
-// Data Schema: AppNode, AppEdge, WorkflowExport from src/types/flow.ts
-// Redesign: Taste-Skill premium developer tool aesthetics with Dual-Theme Tactile Soft-Clay Neumorphic Light & Linear Dark styling
+// Affected API: HeaderToolbar: React.FC<HeaderToolbarProps>, useViewStore.setView, useFlowStore, useExecutionStore, useSettingsStore, validateWorkflow, executeWorkflow
+// Data Schema: HeaderToolbarProps
 
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import {
   Play,
-  Square,
-  Sparkles,
-  Settings,
-  Download,
-  Upload,
-  Trash2,
   CheckCircle2,
   AlertTriangle,
   AlertCircle,
@@ -20,31 +13,24 @@ import {
   Check,
   X,
   Workflow,
-  Terminal,
   Loader2,
   ChevronDown,
   ShieldCheck,
-  Zap,
-  Activity,
   Sun,
   Moon,
 } from "lucide-react";
 import { useFlowStore } from "../../store/useFlowStore";
 import { useExecutionStore } from "../../store/useExecutionStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
+import { useViewStore } from "../../store/useViewStore";
 import { validateWorkflow, executeWorkflow } from "../../engine/dagRunner";
-import { WorkflowExport } from "../../types/flow";
 
-interface HeaderToolbarProps {
-  onOpenTemplates: () => void;
-  onOpenSettings: () => void;
+export interface HeaderToolbarProps {
+  onOpenTemplates?: (mode?: "browse" | "save") => void;
+  onOpenSettings?: () => void;
 }
 
-export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
-  onOpenTemplates,
-  onOpenSettings,
-}) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+export const HeaderToolbar: React.FC<HeaderToolbarProps> = () => {
   const popoverRef = useRef<HTMLDivElement>(null);
 
   // Flow store state
@@ -52,17 +38,15 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
   const edges = useFlowStore((state) => state.edges);
   const workflowName = useFlowStore((state) => state.workflowName);
   const setWorkflowMeta = useFlowStore((state) => state.setWorkflowMeta);
-  const exportWorkflow = useFlowStore((state) => state.exportWorkflow);
-  const loadWorkflow = useFlowStore((state) => state.loadWorkflow);
-  const clearCanvas = useFlowStore((state) => state.clearCanvas);
 
   // Execution store state
   const isExecuting = useExecutionStore((state) => state.currentRun?.status === "running");
   const setDrawerOpen = useExecutionStore((state) => state.setDrawerOpen);
-  const isDrawerOpen = useExecutionStore((state) => state.isDrawerOpen);
+
+  // View state (for returning to landing page)
+  const setView = useViewStore((state) => state.setView);
 
   // Settings state
-  const mockMode = useSettingsStore((state) => state.mockMode);
   const theme = useSettingsStore((state) => state.theme);
   const setTheme = useSettingsStore((state) => state.setTheme);
   const isLight = theme === "light";
@@ -110,47 +94,6 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
     await executeWorkflow();
   };
 
-  // Export workflow to JSON file
-  const handleExportJson = () => {
-    const data = exportWorkflow();
-    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-      JSON.stringify(data, null, 2)
-    )}`;
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", jsonString);
-    const sanitizedName = (workflowName || "workflow")
-      .toLowerCase()
-      .replace(/[^a-z0-9]/gi, "_");
-    downloadAnchor.setAttribute("download", `${sanitizedName}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  };
-
-  // Import workflow from JSON file
-  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const parsed: WorkflowExport = JSON.parse(
-          event.target?.result as string
-        );
-        if (parsed.nodes && Array.isArray(parsed.nodes)) {
-          loadWorkflow(parsed);
-        } else {
-          alert("Invalid workflow JSON schema: Missing 'nodes' array.");
-        }
-      } catch (err) {
-        alert("Failed to parse JSON file. Please check file format.");
-      }
-    };
-    reader.readAsText(file);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
   const handleSaveName = () => {
     if (editNameValue.trim()) {
       setWorkflowMeta(editNameValue.trim());
@@ -162,10 +105,10 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
 
   return (
     <header
-      className={`h-14 px-4 lg:px-5 flex items-center justify-between z-20 select-none relative transition-colors duration-200 ${
+      className={`h-14 px-4 flex items-center justify-between z-20 select-none relative transition-colors duration-200 border-b ${
         isLight
-          ? "bg-[#FAF8F5]/95 backdrop-blur-xl border-b border-[#E7E2D8] text-[#2C2724] shadow-[0_1px_3px_rgba(0,0,0,0.05),inset_0_-1px_0_rgba(255,255,255,0.8)]"
-          : "bg-[#080d1a]/95 backdrop-blur-xl border-b border-slate-800/80 text-slate-100"
+          ? "bg-[#FAF8F5]/95 backdrop-blur-xl border-[#E7E2D8] text-[#2C2724] shadow-[0_1px_3px_rgba(0,0,0,0.03)]"
+          : "bg-[#080d1a]/95 backdrop-blur-xl border-slate-800/80 text-slate-100"
       }`}
     >
       {/* Top subtle ambient gradient line */}
@@ -178,51 +121,43 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
       />
 
       {/* -------------------------------------------------------------
-          Left: Brand Mark, Workflow Name Editor, Auto-save Badge
+          Left: Interactive Brand Mark (Return to Overview) + Prominent Workflow Name Pill + Saved Indicator
           ------------------------------------------------------------- */}
       <div className="flex items-center gap-3.5">
-        {/* Brand Mark */}
-        <div className="flex items-center gap-2.5 group cursor-default">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-indigo-600 flex items-center justify-center shadow-[0_0_16px_rgba(56,189,248,0.25)] border border-white/20 text-white transition-transform group-hover:scale-105">
-            <Workflow className="w-4 h-4 drop-shadow-sm" />
+        {/* Interactive Brand Mark -> 3D Overview */}
+        <button
+          type="button"
+          onClick={() => setView("landing")}
+          className="flex items-center gap-2 group cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded-xl p-1 -m-1 transition-all"
+          title="Return to 3D Overview"
+        >
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm text-white transition-all duration-200 group-hover:scale-105 group-hover:shadow-[0_0_14px_rgba(56,189,248,0.4)]">
+            <Workflow className="w-4 h-4 drop-shadow-sm transition-transform duration-200 group-hover:rotate-6" />
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span
-                className={`text-xs font-black tracking-wider uppercase ${
-                  isLight ? "text-[#2C2724]" : "text-slate-100"
-                }`}
-              >
-                AI Flow
-              </span>
-              <span
-                className={`text-[10px] font-mono font-medium px-1.5 py-0.2 rounded border ${
-                  isLight
-                    ? "bg-amber-500/10 text-amber-800 border-amber-500/30"
-                    : "bg-sky-500/10 text-sky-400 border-sky-500/25"
-                }`}
-              >
-                PRO
-              </span>
-            </div>
-            <p
-              className={`text-[10px] font-medium tracking-tight ${
-                isLight ? "text-[#7A7269]" : "text-slate-500"
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`text-sm font-bold tracking-tight transition-colors ${
+                isLight ? "text-[#2C2724] group-hover:text-sky-600" : "text-slate-100 group-hover:text-sky-400"
               }`}
             >
-              Visual DAG Engine
-            </p>
+              AI Flow
+            </span>
+            <span
+              className={`text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded border transition-colors ${
+                isLight
+                  ? "bg-amber-500/10 text-amber-800 border-amber-500/30 group-hover:border-amber-500/50"
+                  : "bg-cyan-500/10 text-cyan-400 border-cyan-500/25 group-hover:border-cyan-500/40"
+              }`}
+            >
+              PRO
+            </span>
           </div>
-        </div>
+        </button>
 
-        <div
-          className={`h-5 w-px mx-0.5 ${
-            isLight ? "bg-[#E7E2D8]" : "bg-slate-800/80"
-          }`}
-        />
+        <div className={`h-5 w-px ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
 
-        {/* Workflow Name Editor & Status Indicator */}
-        <div className="flex items-center gap-2.5">
+        {/* Hero-like Highlighted Workflow Name Editor */}
+        <div className="flex items-center gap-2">
           {isEditingName ? (
             <div className="flex items-center gap-1.5">
               <input
@@ -237,10 +172,10 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
                   }
                 }}
                 autoFocus
-                className={`rounded-lg px-2.5 py-1 text-xs font-medium focus:outline-none focus:ring-2 shadow-inner w-56 transition-all ${
+                className={`rounded-xl px-3 py-1 text-sm sm:text-base font-bold tracking-tight focus:outline-none focus:ring-2 shadow-inner w-56 sm:w-72 transition-all ${
                   isLight
-                    ? "bg-[#F5F2EB] border border-[#D4CEB8] text-[#2C2724] focus:ring-amber-500/20"
-                    : "bg-slate-900/90 border border-sky-500/50 text-slate-100 focus:ring-sky-500/20"
+                    ? "bg-[#F5F2EB] border border-amber-500/40 text-[#2C2724] focus:ring-amber-500/30"
+                    : "bg-slate-900/90 border border-sky-500/50 text-slate-100 focus:ring-sky-500/40"
                 }`}
                 placeholder="Workflow name..."
               />
@@ -248,13 +183,13 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
                 type="button"
                 onClick={handleSaveName}
                 title="Save name (Enter)"
-                className={`p-1 rounded-md transition-colors border ${
+                className={`p-1.5 rounded-lg transition-colors border ${
                   isLight
                     ? "bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 border-amber-500/30"
                     : "bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border-sky-500/30"
                 }`}
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-4 h-4" />
               </button>
               <button
                 type="button"
@@ -263,21 +198,21 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
                   setIsEditingName(false);
                 }}
                 title="Cancel (Esc)"
-                className={`p-1 rounded-md transition-colors ${
+                className={`p-1.5 rounded-lg transition-colors ${
                   isLight
                     ? "bg-[#EBE6DD] hover:bg-[#E0DACF] text-[#7A7269]"
                     : "bg-slate-800/80 hover:bg-slate-700 text-slate-400"
                 }`}
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
             <div
-              className={`flex items-center gap-2 group cursor-pointer px-2 py-1 -mx-2 rounded-lg border transition-all ${
+              className={`flex items-center gap-2 group cursor-pointer px-3 py-1.5 rounded-xl border transition-all duration-200 ${
                 isLight
-                  ? "hover:bg-[#F5F2EB] border-transparent hover:border-[#E7E2D8]"
-                  : "hover:bg-slate-900/70 border-transparent hover:border-slate-800"
+                  ? "bg-gradient-to-b from-[#F5F2EB] to-[#EBE6DD] hover:from-[#EFE9DC] hover:to-[#E5DECF] border-[#DDD7C8] hover:border-[#CAC2B0] shadow-[0_1px_3px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.8)]"
+                  : "bg-gradient-to-b from-slate-900/90 to-slate-950/90 hover:from-slate-800/90 hover:to-slate-900/90 border-slate-800/90 hover:border-slate-700/90 shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)]"
               }`}
               onClick={() => {
                 setEditNameValue(workflowName);
@@ -286,37 +221,35 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
               title="Click to rename workflow"
             >
               <span
-                className={`text-xs font-semibold transition-colors max-w-[200px] sm:max-w-[260px] truncate ${
+                className={`text-sm sm:text-base font-bold tracking-tight transition-colors max-w-[180px] sm:max-w-[280px] md:max-w-[360px] truncate ${
                   isLight
                     ? "text-[#2C2724] group-hover:text-black"
-                    : "text-slate-200 group-hover:text-white"
+                    : "text-slate-100 group-hover:text-white"
                 }`}
               >
                 {workflowName}
               </span>
               <Edit3
-                className={`w-3 h-3 opacity-0 group-hover:opacity-100 transition-all ${
+                className={`w-3.5 h-3.5 transition-all ${
                   isLight
-                    ? "text-[#9C9287] group-hover:text-amber-600"
-                    : "text-slate-500 group-hover:text-sky-400"
+                    ? "text-[#9C9287] group-hover:text-amber-700 opacity-60 group-hover:opacity-100"
+                    : "text-slate-400 group-hover:text-sky-400 opacity-60 group-hover:opacity-100"
                 }`}
               />
             </div>
           )}
 
-          {/* Auto-saved Indicator */}
+          {/* Auto-saved Status Badge */}
           <div
-            className={`hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono border ${
-              isLight
-                ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#7A7269]"
-                : "bg-slate-900/60 border-slate-800/60 text-slate-500"
+            className={`hidden md:flex items-center gap-1.5 text-[11px] font-mono px-2 py-0.5 rounded-md ${
+              isLight ? "text-[#7A7269] bg-[#EDE8DE]/60" : "text-slate-500 bg-slate-900/40"
             }`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
                 isLight
                   ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]"
-                  : "bg-emerald-400/80 shadow-[0_0_6px_rgba(52,211,153,0.6)]"
+                  : "bg-emerald-400/90 shadow-[0_0_6px_rgba(52,211,153,0.6)]"
               }`}
             />
             <span>Saved</span>
@@ -325,7 +258,7 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
       </div>
 
       {/* -------------------------------------------------------------
-          Center: DAG Status Badge, Topology Popover & Run Trigger
+          Right / Center Controls: DAG Status Badge & Popover, Primary Run Button, Theme Toggle
           ------------------------------------------------------------- */}
       <div className="flex items-center gap-3">
         {/* Validation Status Badge with Popover */}
@@ -333,14 +266,14 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
           <button
             type="button"
             onClick={() => setShowValidationPopover(!showValidationPopover)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[11px] font-mono border transition-all shadow-sm ${
+            className={`flex items-center gap-2 h-8.5 px-3 rounded-xl text-xs font-mono border whitespace-nowrap transition-all shadow-sm ${
               validation.valid
                 ? isLight
-                  ? "bg-emerald-500/10 border-emerald-600/30 text-emerald-700 hover:bg-emerald-500/20 hover:border-emerald-600/40"
-                  : "bg-emerald-500/10 border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/15 hover:border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.1)]"
+                  ? "bg-emerald-500/10 border-emerald-600/30 text-emerald-800 hover:bg-emerald-500/20"
+                  : "bg-emerald-500/10 border-emerald-500/25 text-emerald-300 hover:bg-emerald-500/15 shadow-[0_0_10px_rgba(16,185,129,0.1)]"
                 : isLight
-                ? "bg-rose-500/10 border-rose-600/30 text-rose-700 hover:bg-rose-500/20 hover:border-rose-600/40"
-                : "bg-rose-500/10 border-rose-500/25 text-rose-400 hover:bg-rose-500/15 hover:border-rose-500/40 shadow-[0_0_12px_rgba(244,63,94,0.15)]"
+                ? "bg-rose-500/10 border-rose-600/30 text-rose-800 hover:bg-rose-500/20"
+                : "bg-rose-500/10 border-rose-500/25 text-rose-300 hover:bg-rose-500/15 shadow-[0_0_10px_rgba(244,63,94,0.1)]"
             }`}
           >
             {validation.valid ? (
@@ -360,14 +293,14 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
                 <span className="font-semibold tracking-tight">DAG Valid</span>
                 <span
                   className={`text-[10px] ${
-                    isLight ? "text-emerald-700/80" : "text-emerald-500/70"
+                    isLight ? "text-emerald-800/70" : "text-emerald-400/70"
                   }`}
                 >
                   ({nodes.length} nodes)
                 </span>
                 <ChevronDown
                   className={`w-3 h-3 transition-transform ${
-                    isLight ? "text-emerald-700/80" : "text-emerald-500/70"
+                    isLight ? "text-emerald-800/70" : "text-emerald-400/70"
                   } ${showValidationPopover ? "rotate-180" : ""}`}
                 />
               </>
@@ -379,8 +312,7 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
                   }`}
                 />
                 <span className="font-semibold tracking-tight">
-                  {validation.errors.length} DAG{" "}
-                  {validation.errors.length === 1 ? "Issue" : "Issues"}
+                  {validation.errors.length} DAG {validation.errors.length === 1 ? "Issue" : "Issues"}
                 </span>
                 <ChevronDown
                   className={`w-3 h-3 transition-transform ${
@@ -391,10 +323,10 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
             )}
           </button>
 
-          {/* Upgraded Glassmorphic Validation Popover */}
+          {/* Glassmorphic Validation Popover */}
           {showValidationPopover && (
             <div
-              className={`absolute top-full mt-2.5 left-1/2 -translate-x-1/2 w-84 rounded-2xl p-4 z-50 text-xs animation-fade-in border ${
+              className={`absolute top-full mt-2.5 right-0 sm:left-1/2 sm:-translate-x-1/2 w-84 rounded-2xl p-4 z-50 text-xs animation-fade-in border ${
                 isLight
                   ? "bg-[#FAF8F5] border-[#E7E2D8] text-[#2C2724] shadow-[0_12px_32px_rgba(180,165,145,0.25)]"
                   : "bg-[#0c1220]/95 backdrop-blur-xl border-slate-800/90 text-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
@@ -604,29 +536,29 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
           )}
         </div>
 
-        {/* High-Impact Run Workflow Action Button */}
+        {/* High-Impact Run Workflow Primary Action Button */}
         <button
           type="button"
           disabled={!validation.valid || isExecuting}
           onClick={handleRunWorkflow}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all select-none border ${
+          className={`flex items-center gap-2 h-8.5 px-4 rounded-xl text-xs font-semibold transition-all select-none border whitespace-nowrap ${
             isExecuting
               ? isLight
                 ? "bg-sky-600 border-sky-500 text-white animate-pulse shadow-md cursor-wait"
-                : "bg-sky-600/90 border-sky-400/50 text-white animate-pulse shadow-[0_0_24px_rgba(56,189,248,0.4)] cursor-wait"
+                : "bg-sky-600/90 border-sky-400/50 text-white animate-pulse shadow-[0_0_20px_rgba(56,189,248,0.4)] cursor-wait"
               : !validation.valid
               ? isLight
                 ? "bg-[#EBE6DD] border-[#E7E2D8] text-[#9C9287] cursor-not-allowed opacity-70 shadow-none"
                 : "bg-slate-900/80 border-slate-800/80 text-slate-500 cursor-not-allowed opacity-60 shadow-none"
               : isLight
-              ? "bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-400 hover:via-sky-500 hover:to-indigo-500 active:scale-[0.98] text-white border-white/40 shadow-[0_2px_8px_rgba(14,165,233,0.35),inset_0_1px_0_rgba(255,255,255,0.4)] hover:shadow-[0_4px_16px_rgba(14,165,233,0.5)]"
-              : "bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-400 hover:via-sky-500 hover:to-indigo-500 active:scale-[0.98] text-white border-sky-400/30 shadow-[0_0_20px_rgba(56,189,248,0.25)] hover:shadow-[0_0_28px_rgba(56,189,248,0.4)]"
+              ? "bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-400 hover:via-sky-500 hover:to-indigo-500 active:scale-[0.98] text-white border-white/40 shadow-[0_2px_10px_rgba(14,165,233,0.35)] cursor-pointer"
+              : "bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-400 hover:via-sky-500 hover:to-indigo-500 active:scale-[0.98] text-white border-sky-400/30 shadow-[0_0_18px_rgba(56,189,248,0.25)] hover:shadow-[0_0_24px_rgba(56,189,248,0.4)] cursor-pointer"
           }`}
         >
           {isExecuting ? (
             <>
               <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-200" />
-              <span>Running Flow...</span>
+              <span>Running...</span>
             </>
           ) : (
             <>
@@ -635,161 +567,19 @@ export const HeaderToolbar: React.FC<HeaderToolbarProps> = ({
             </>
           )}
         </button>
-      </div>
 
-      {/* -------------------------------------------------------------
-          Right: Templates, JSON I/O, Canvas Clear, Logs, Settings, Theme
-          ------------------------------------------------------------- */}
-      <div className="flex items-center gap-2">
-        {/* Templates Picker Trigger */}
-        <button
-          type="button"
-          onClick={onOpenTemplates}
-          title="Browse Workflow Templates"
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all text-xs font-medium group ${
-            isLight
-              ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#443E3A] hover:bg-[#EBE6DD] hover:text-[#2C2724] shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.9)]"
-              : "bg-slate-900/80 border-slate-800/80 text-slate-200 hover:text-white hover:bg-slate-800/90 hover:border-slate-700 shadow-sm"
-          }`}
-        >
-          <Sparkles
-            className={`w-3.5 h-3.5 group-hover:scale-110 transition-transform ${
-              isLight ? "text-amber-500" : "text-amber-400"
-            }`}
-          />
-          <span>Templates</span>
-        </button>
+        <div className={`h-5 w-px ${isLight ? "bg-[#E7E2D8]" : "bg-slate-800"}`} />
 
-        {/* JSON File Export / Import / Clear Canvas Button Group */}
-        <div
-          className={`flex items-center gap-0.5 p-0.5 rounded-xl border ${
-            isLight
-              ? "bg-[#F5F2EB] border-[#E7E2D8] shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.9)]"
-              : "bg-slate-900/80 border-slate-800/80"
-          }`}
-        >
-          <button
-            type="button"
-            onClick={handleExportJson}
-            title="Export Workflow JSON"
-            className={`p-1.5 rounded-lg transition-all ${
-              isLight
-                ? "hover:bg-[#EBE6DD] text-[#7A7269] hover:text-sky-600"
-                : "hover:bg-slate-800/80 text-slate-400 hover:text-sky-400"
-            }`}
-          >
-            <Download className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            title="Import Workflow JSON"
-            className={`p-1.5 rounded-lg transition-all ${
-              isLight
-                ? "hover:bg-[#EBE6DD] text-[#7A7269] hover:text-sky-600"
-                : "hover:bg-slate-800/80 text-slate-400 hover:text-sky-400"
-            }`}
-          >
-            <Upload className="w-3.5 h-3.5" />
-          </button>
-
-          <div
-            className={`h-3 w-px mx-0.5 ${
-              isLight ? "bg-[#E7E2D8]" : "bg-slate-800"
-            }`}
-          />
-
-          <button
-            type="button"
-            onClick={() => {
-              if (nodes.length === 0 || confirm("Clear all nodes and connections from the canvas?")) {
-                clearCanvas();
-              }
-            }}
-            title="Clear Canvas"
-            className={`p-1.5 rounded-lg transition-all ${
-              isLight
-                ? "hover:bg-[#EBE6DD] text-[#7A7269] hover:text-rose-600"
-                : "hover:bg-slate-800/80 text-slate-400 hover:text-rose-400"
-            }`}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json,application/json"
-          onChange={handleImportJson}
-          className="hidden"
-        />
-
-        <div
-          className={`h-5 w-px mx-0.5 ${
-            isLight ? "bg-[#E7E2D8]" : "bg-slate-800/80"
-          }`}
-        />
-
-        {/* Execution Logs Drawer Toggle */}
-        <button
-          type="button"
-          onClick={() => setDrawerOpen(!isDrawerOpen)}
-          title="Toggle Execution Telemetry & Logs Drawer"
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
-            isDrawerOpen
-              ? isLight
-                ? "bg-sky-500/15 border-sky-500/40 text-sky-700 shadow-sm"
-                : "bg-sky-500/15 border-sky-500/40 text-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.2)]"
-              : isLight
-              ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#7A7269] hover:text-[#2C2724] hover:bg-[#EBE6DD] shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.9)]"
-              : "bg-slate-900/80 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80"
-          }`}
-        >
-          <Terminal className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Logs</span>
-        </button>
-
-        {/* Settings Modal Trigger */}
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          title="API Keys & Engine Settings"
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all group ${
-            isLight
-              ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#443E3A] hover:bg-[#EBE6DD] hover:text-[#2C2724] shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.9)]"
-              : "bg-slate-900/80 border-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-800/80 hover:border-slate-700 shadow-sm"
-          }`}
-        >
-          <Settings
-            className={`w-3.5 h-3.5 group-hover:rotate-45 transition-transform ${
-              isLight ? "text-[#7A7269] group-hover:text-[#2C2724]" : "text-slate-400 group-hover:text-slate-200"
-            }`}
-          />
-          <span className="hidden sm:inline">Settings</span>
-          {mockMode && (
-            <span
-              className={`w-2 h-2 rounded-full animate-pulse ${
-                isLight
-                  ? "bg-amber-500 ring-2 ring-amber-500/20"
-                  : "bg-amber-400 ring-2 ring-amber-400/20"
-              }`}
-              title="Mock Simulation Mode Active"
-            />
-          )}
-        </button>
-
-        {/* Dual Theme Toggle: Sun / Moon Button */}
+        {/* Dual Theme Toggle (Sun / Moon) */}
         <button
           type="button"
           onClick={() => setTheme(isLight ? "dark" : "light")}
           title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
           aria-label={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
-          className={`p-1.5 rounded-xl border text-xs font-medium transition-all flex items-center justify-center ${
+          className={`h-8 w-8 flex items-center justify-center rounded-xl border transition-all cursor-pointer ${
             isLight
-              ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#443E3A] hover:bg-[#EBE6DD] hover:text-[#2C2724] shadow-[0_1px_2px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.9)] active:scale-95"
-              : "bg-slate-900/80 border-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-800/80 hover:border-slate-700 shadow-sm active:scale-95"
+              ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#7A7269] hover:text-[#2C2724] hover:bg-white shadow-sm"
+              : "bg-slate-900/80 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 shadow-sm"
           }`}
         >
           {isLight ? (

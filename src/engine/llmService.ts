@@ -50,6 +50,24 @@ function generateMockResponse(params: LLMRequestParams): string {
       );
     }
 
+    if (promptLower.includes("ats") || promptLower.includes("resume") || promptLower.includes("compatibility")) {
+      return JSON.stringify(
+        {
+          score: 85,
+          matchGrade: "High",
+          atsCompatibility: "Optimized",
+          matchedKeywords: ["TypeScript", "React Flow", "Next.js", "DAG", "PostgreSQL"],
+          missingKeywords: ["Kubernetes", "Redis cache tuning"],
+          recommendations: [
+            "Quantify impact of developer tools.",
+            "Add XYZ format to Node.js experience."
+          ]
+        },
+        null,
+        2
+      );
+    }
+
     if (promptLower.includes("extract") || promptLower.includes("entities") || promptLower.includes("summary")) {
       return JSON.stringify(
         {
@@ -238,7 +256,12 @@ export async function executeLLMRequest(params: LLMRequestParams): Promise<LLMRe
         const apiKey = apiKeys.gemini;
         if (!apiKey) throw new Error("Google Gemini API key is missing in Settings");
 
-        const geminiModel = model.includes("gemini") ? model : "gemini-1.5-flash";
+        let geminiModel = model.includes("gemini") ? model : "gemini-1.5-flash";
+        // Google deprecated the 'gemini-2.0-pro-exp' alias in Feb 2025 – auto-correct it to the specific version
+        if (geminiModel === "gemini-2.0-pro-exp") {
+          geminiModel = "gemini-2.0-pro-exp-02-05";
+        }
+
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
 
         const contents: any[] = [];

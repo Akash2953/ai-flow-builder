@@ -1,3 +1,9 @@
+<!-- index.html: Entrypoint HTML host document
+     Importers/Callers: Vite dev/build server
+     Affected API: <body> root container styles (allowing vertical scroll on landing page)
+     Data Schema: HTML5 Root Template
+     User Instruction: "i'm unable to scroll in landing page"
+-->
 <!doctype html>
 <html lang="en" class="dark">
   <head>
@@ -7,9 +13,9 @@
     <title>AI Flow Builder — Visual AI Workflow Automation</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   </head>
-  <body class="bg-[#0b0f17] text-slate-100 antialiased overflow-hidden select-none">
+  <body class="bg-[#FAF8F5] dark:bg-[#090D16] text-[#2C2724] dark:text-slate-100 antialiased selection:bg-sky-500/20 selection:text-sky-300">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

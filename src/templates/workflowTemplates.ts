@@ -9,10 +9,61 @@ export interface WorkflowTemplate {
   id: string;
   name: string;
   description: string;
-  category: "Support" | "Research" | "Engineering" | "Career" | "Content";
+  category: "Support" | "Research" | "Engineering" | "Career" | "Content" | "Custom" | string;
   badge: string;
   nodes: AppNode[];
   edges: AppEdge[];
+  isCustom?: boolean;
+}
+
+export const CUSTOM_TEMPLATES_STORAGE_KEY = "ai_flow_builder_custom_templates";
+
+export function getCustomTemplates(): WorkflowTemplate[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_TEMPLATES_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.error("Failed to load custom templates", e);
+    return [];
+  }
+}
+
+export function saveCustomTemplate(template: Omit<WorkflowTemplate, "id"> & { id?: string }): WorkflowTemplate {
+  const customTemplates = getCustomTemplates();
+  const id = template.id || `custom_template_${Date.now()}`;
+  const newTemplate: WorkflowTemplate = {
+    ...template,
+    id,
+    category: template.category || "Custom",
+    badge: template.badge || "User Template",
+    isCustom: true,
+  };
+
+  const existingIdx = customTemplates.findIndex((t) => t.id === id);
+  if (existingIdx >= 0) {
+    customTemplates[existingIdx] = newTemplate;
+  } else {
+    customTemplates.unshift(newTemplate);
+  }
+
+  try {
+    localStorage.setItem(CUSTOM_TEMPLATES_STORAGE_KEY, JSON.stringify(customTemplates));
+  } catch (e) {
+    console.error("Failed to save custom template to localStorage", e);
+  }
+
+  return newTemplate;
+}
+
+export function deleteCustomTemplate(id: string): void {
+  const customTemplates = getCustomTemplates().filter((t) => t.id !== id);
+  try {
+    localStorage.setItem(CUSTOM_TEMPLATES_STORAGE_KEY, JSON.stringify(customTemplates));
+  } catch (e) {
+    console.error("Failed to delete custom template from localStorage", e);
+  }
 }
 
 export const workflowTemplates: WorkflowTemplate[] = [

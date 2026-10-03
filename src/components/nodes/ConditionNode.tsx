@@ -126,55 +126,49 @@ export const ConditionNode: React.FC<NodeProps<AppNode>> = ({
           </div>
         )}
 
-        <div className="pt-1 flex items-center justify-between text-[10px] font-mono">
+        {/* Anchored Branch Output Indicator Rows with Integrated Handles */}
+        <div className="space-y-1.5 pt-1">
           <div
-            className={`flex items-center gap-1 px-2 py-0.5 rounded-md border ${
+            className={`relative flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-[11px] font-mono font-medium ${
               isLight
-                ? "bg-emerald-50 text-emerald-800 border-emerald-200 shadow-sm"
-                : "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                ? "bg-emerald-500/10 text-emerald-800 border-emerald-500/25 shadow-sm"
+                : "text-emerald-300 bg-emerald-950/40 border-emerald-500/30 shadow-[0_0_8px_rgba(16,185,129,0.1)]"
             }`}
           >
-            <Check className="w-3 h-3" />
-            <span>True Branch</span>
+            <div className="flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5 text-emerald-500" />
+              <span>True Branch</span>
+            </div>
+            <span className="text-[10px] opacity-75 mr-2">IF PASS</span>
+            <Handle
+              type="source"
+              position={Position.Right}
+              id="true"
+              className="source-condition-true !-right-[15px] !w-2.5 !h-2.5"
+            />
           </div>
+
           <div
-            className={`flex items-center gap-1 px-2 py-0.5 rounded-md border ${
+            className={`relative flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-[11px] font-mono font-medium ${
               isLight
-                ? "bg-rose-50 text-rose-800 border-rose-200 shadow-sm"
-                : "text-rose-400 bg-rose-500/10 border-rose-500/20"
+                ? "bg-rose-500/10 text-rose-800 border-rose-500/25 shadow-sm"
+                : "text-rose-300 bg-rose-950/40 border-rose-500/30 shadow-[0_0_8px_rgba(244,63,94,0.1)]"
             }`}
           >
-            <X className="w-3 h-3" />
-            <span>False Branch</span>
+            <div className="flex items-center gap-1.5">
+              <X className="w-3.5 h-3.5 text-rose-500" />
+              <span>False Branch</span>
+            </div>
+            <span className="text-[10px] opacity-75 mr-2">ELSE</span>
+            <Handle
+              type="source"
+              position={Position.Right}
+              id="false"
+              className="source-condition-false !-right-[15px] !w-2.5 !h-2.5"
+            />
           </div>
         </div>
       </div>
-
-      {/* True Source Handle (Top Right) */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="true"
-        style={{ top: "38%" }}
-        className={`!w-3 !h-3 transition-transform hover:!scale-125 ${
-          isLight
-            ? "!bg-emerald-500 !border-2 !border-[#FAF8F5] !shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-            : "!bg-emerald-400 !border-2 !border-[#080d18] !shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-        }`}
-      />
-
-      {/* False Source Handle (Bottom Right) */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="false"
-        style={{ top: "68%" }}
-        className={`!w-3 !h-3 transition-transform hover:!scale-125 ${
-          isLight
-            ? "!bg-rose-500 !border-2 !border-[#FAF8F5] !shadow-[0_0_8px_rgba(244,63,94,0.5)]"
-            : "!bg-rose-400 !border-2 !border-[#080d18] !shadow-[0_0_8px_rgba(244,63,94,0.5)]"
-        }`}
-      />
     </BaseNodeWrapper>
   );
 };

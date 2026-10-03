@@ -5,11 +5,13 @@
 
 import React from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import { Terminal, FileText, Code, Table } from "lucide-react";
+import { Terminal, FileText, Code, Table, Download, FileDown } from "lucide-react";
 import { BaseNodeWrapper } from "./BaseNodeWrapper";
 import { OutputNodeData } from "../../types/nodes";
 import { AppNode } from "../../types/flow";
 import { useSettingsStore } from "../../store/useSettingsStore";
+import { useExecutionStore } from "../../store/useExecutionStore";
+import { downloadText, downloadDocx, downloadPdf } from "../../utils/exportUtils";
 
 export const OutputNode: React.FC<NodeProps<AppNode>> = ({
   id,
@@ -20,6 +22,8 @@ export const OutputNode: React.FC<NodeProps<AppNode>> = ({
   const displayFormat = nodeData.displayFormat || "text";
   const theme = useSettingsStore((state) => state.theme);
   const isLight = theme === "light";
+  const liveOutput = useExecutionStore((state) => state.nodeOutputs[id]?.output);
+  const displayOutput = liveOutput !== undefined ? liveOutput : nodeData.lastOutput;
 
   const getFormatIcon = () => {
     switch (displayFormat) {
@@ -35,7 +39,7 @@ export const OutputNode: React.FC<NodeProps<AppNode>> = ({
   };
 
   const renderOutputPreview = () => {
-    if (nodeData.lastOutput === undefined || nodeData.lastOutput === null) {
+    if (displayOutput === undefined || displayOutput === null) {
       return (
         <div
           className={`italic text-[11px] font-mono ${
@@ -48,9 +52,9 @@ export const OutputNode: React.FC<NodeProps<AppNode>> = ({
     }
 
     const outputStr =
-      typeof nodeData.lastOutput === "object"
-        ? JSON.stringify(nodeData.lastOutput, null, 2)
-        : String(nodeData.lastOutput);
+      typeof displayOutput === "object"
+        ? JSON.stringify(displayOutput, null, 2)
+        : String(displayOutput);
 
     return (
       <pre
@@ -120,6 +124,59 @@ export const OutputNode: React.FC<NodeProps<AppNode>> = ({
         >
           {renderOutputPreview()}
         </div>
+
+        {displayOutput !== undefined && displayOutput !== null && (
+          <div className="flex items-center gap-1.5 pt-0.5">
+            <span className={`text-[10px] font-medium ${isLight ? "text-[#7A7269]" : "text-slate-500"}`}>
+              Export:
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const str = typeof displayOutput === "object" ? JSON.stringify(displayOutput, null, 2) : String(displayOutput);
+                downloadText(str, "tailored_resume.txt");
+              }}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono border transition-all hover:scale-105 active:scale-95 ${
+                isLight
+                  ? "bg-white border-[#E7E2D8] text-[#2C2724] hover:bg-[#FAF8F5]"
+                  : "bg-slate-900/90 border-slate-800 text-slate-300 hover:bg-slate-800"
+              }`}
+            >
+              TXT
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const str = typeof displayOutput === "object" ? JSON.stringify(displayOutput, null, 2) : String(displayOutput);
+                downloadDocx(str, "tailored_resume.docx");
+              }}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border transition-all hover:scale-105 active:scale-95 ${
+                isLight
+                  ? "bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100"
+                  : "bg-blue-950/50 border-blue-700/50 text-blue-300 hover:bg-blue-900/50"
+              }`}
+            >
+              DOCX
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const str = typeof displayOutput === "object" ? JSON.stringify(displayOutput, null, 2) : String(displayOutput);
+                downloadPdf(str, "tailored_resume.pdf");
+              }}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border transition-all hover:scale-105 active:scale-95 ${
+                isLight
+                  ? "bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100"
+                  : "bg-rose-950/50 border-rose-700/50 text-rose-300 hover:bg-rose-900/50"
+              }`}
+            >
+              PDF
+            </button>
+          </div>
+        )}
       </div>
     </BaseNodeWrapper>
   );

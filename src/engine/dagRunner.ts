@@ -513,6 +513,9 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
           durationMs
         );
 
+        // Persist output to node data so it survives page reloads
+        flowStore.updateNodeData(node.id, { lastOutput: result.output });
+
         // If this was a condition node, mark inactive branch children as skipped
         if (node.type === "condition" && result.conditionBranch) {
           const outgoingEdges = edges.filter((e) => e.source === node.id);

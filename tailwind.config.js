@@ -4,14 +4,67 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          '"Plus Jakarta Sans"',
+          "Inter",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+        mono: [
+          '"JetBrains Mono"',
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "Monaco",
+          "Consolas",
+          "monospace",
+        ],
+      },
+      letterSpacing: {
+        tighter: "-0.035em",
+        tight: "-0.02em",
+        snug: "-0.01em",
+        normal: "0",
+        wide: "0.025em",
+        wider: "0.05em",
+        widest: "0.1em",
+      },
       colors: {
         canvas: {
-          dark: "#080c14",
-          subtle: "#0d131f",
-          panel: "#121b2b",
-          border: "#1e293b",
-          borderSubtle: "#172234",
-          active: "#38bdf8",
+          dark: "#090D16",
+          subtle: "#0D1322",
+          panel: "#161F36",
+          hover: "#1E294B",
+          border: "#1E293B",
+          borderSubtle: "rgba(255, 255, 255, 0.08)",
+          active: "#0ea5e9",
+          // Soft-clay light mode palette
+          light: "#FAF8F5",
+          lightSurface: "#F4EFE6",
+          lightPanel: "#EFE8DA",
+          lightBorder: "#E5DECE",
+        },
+        clay: {
+          50: "#FAF8F5",
+          100: "#F4EFE6",
+          200: "#EFE8DA",
+          300: "#E5DECE",
+          400: "#D4CEB8",
+          500: "#9C9287",
+          600: "#6E655F",
+          700: "#443E3A",
+          800: "#2C2724",
+          900: "#1A1715",
+        },
+        accent: {
+          sky: "#0ea5e9",
+          skyGlow: "#38bdf8",
+          amber: "#d97706",
+          amberGlow: "#f59e0b",
         },
         node: {
           trigger: "#f59e0b",
@@ -33,12 +86,16 @@ export default {
           800: "#075985",
           900: "#0c4a6e",
           950: "#082f49",
-        }
+        },
       },
       boxShadow: {
-        subtle: "0 1px 2px 0 rgba(0, 0, 0, 0.4)",
-        card: "0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)",
-        glow: "0 0 25px -5px rgba(56, 189, 248, 0.35)",
+        subtle: "0 1px 2px 0 rgba(5, 10, 24, 0.4)",
+        card: "0 4px 20px -2px rgba(5, 10, 24, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06)",
+        elevated: "0 16px 40px -4px rgba(5, 10, 24, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08)",
+        clayCard: "0 4px 20px -2px rgba(180, 165, 145, 0.25), 0 1px 3px 0 rgba(140, 125, 105, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+        clayElevated: "0 12px 36px -4px rgba(180, 165, 145, 0.35), 0 4px 12px -2px rgba(140, 125, 105, 0.15)",
+        glow: "0 0 25px -5px rgba(14, 165, 233, 0.35)",
+        glowAmber: "0 0 25px -5px rgba(217, 119, 6, 0.35)",
         "glow-trigger": "0 0 20px -4px rgba(245, 158, 11, 0.35)",
         "glow-llm": "0 0 20px -4px rgba(139, 92, 246, 0.35)",
         "glow-condition": "0 0 20px -4px rgba(14, 165, 233, 0.35)",
@@ -49,12 +106,22 @@ export default {
         "glow-error": "0 0 20px -4px rgba(239, 68, 68, 0.4)",
         "glow-running": "0 0 20px -4px rgba(56, 189, 248, 0.5)",
       },
+      keyframes: {
+        borderFlow: {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+      },
       animation: {
         pulseFast: "pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        borderFlow: "borderFlow 2s ease infinite",
-      }
+        borderFlow: "borderFlow 3s ease infinite",
+        shimmer: "shimmer 2s linear infinite",
+      },
     },
   },
   plugins: [],
-}
-
+};

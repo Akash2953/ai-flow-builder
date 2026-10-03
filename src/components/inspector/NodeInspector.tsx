@@ -4,7 +4,7 @@
 // Data Schema: NodeExecutionStatus, NodeType from src/types/flow.ts, NodeData interfaces from src/types/nodes.ts
 // Redesign: Taste-Skill premium developer tool aesthetics with Dual-Theme Tactile Soft-Clay Neumorphic Light & Linear Dark styling
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   X,
   Copy,
@@ -25,10 +25,16 @@ import {
   Code,
   Table as TableIcon,
   Sparkles,
+  Upload,
   Braces,
+  Download,
+  FileDown,
+  ArrowRightLeft,
 } from "lucide-react";
 import { useFlowStore } from "../../store/useFlowStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
+import { useExecutionStore } from "../../store/useExecutionStore";
+import { downloadText, downloadDocx, downloadPdf } from "../../utils/exportUtils";
 import { NodeExecutionStatus, NodeType } from "../../types/flow";
 import {
   TriggerNodeData,
@@ -227,6 +233,7 @@ export const NodeInspector: React.FC = () => {
   const [copiedOutput, setCopiedOutput] = useState(false);
   const [copiedWebhook, setCopiedWebhook] = useState(false);
   const [jsonPayloadError, setJsonPayloadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const theme = useSettingsStore((state) => state.theme);
   const isLight = theme === "light";
@@ -235,100 +242,19 @@ export const NodeInspector: React.FC = () => {
   const edges = useFlowStore((state) => state.edges);
   const selectedNodeId = useFlowStore((state) => state.selectedNodeId);
   const setSelectedNodeId = useFlowStore((state) => state.setSelectedNodeId);
+  const changeNodeType = useFlowStore((state) => state.changeNodeType);
   const updateNodeData = useFlowStore((state) => state.updateNodeData);
   const deleteNode = useFlowStore((state) => state.deleteNode);
   const duplicateNode = useFlowStore((state) => state.duplicateNode);
+  const liveOutput = useExecutionStore((state) =>
+    selectedNodeId ? state.nodeOutputs[selectedNodeId]?.output : undefined
+  );
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
-  // --- 1. Empty State View ---
+  // --- 1. Empty State View: Return null so inspector takes 0 width when no node is selected ---
   if (!selectedNode) {
-    return (
-      <aside
-        className={`w-80 h-full flex flex-col items-center justify-center p-6 text-center select-none backdrop-blur-md z-10 relative overflow-hidden transition-colors duration-200 ${
-          isLight
-            ? "bg-[#FAF8F5]/95 border-l border-[#E7E2D8] text-[#2C2724] shadow-[-2px_0_12px_rgba(0,0,0,0.03)]"
-            : "bg-[#080d18] border-l border-slate-800/60 text-slate-100"
-        }`}
-      >
-        {/* Subtle Ambient Radial Glow */}
-        <div
-          className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl pointer-events-none ${
-            isLight ? "bg-amber-500/5" : "bg-sky-500/5"
-          }`}
-        />
-
-        <div
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-all ${
-            isLight
-              ? "bg-[#F5F2EB] border border-[#E7E2D8] text-[#7A7269] shadow-[0_4px_16px_rgba(180,165,145,0.2)]"
-              : "bg-[#0c1220] border border-slate-800/80 text-slate-400 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
-          }`}
-        >
-          <MousePointerClick
-            className={`w-5 h-5 ${isLight ? "text-[#7A7269]" : "text-slate-400"}`}
-          />
-        </div>
-        <h3
-          className={`text-xs font-semibold tracking-tight ${
-            isLight ? "text-[#2C2724]" : "text-slate-100"
-          }`}
-        >
-          No Node Selected
-        </h3>
-        <p
-          className={`text-[11px] mt-1 max-w-[210px] leading-relaxed ${
-            isLight ? "text-[#7A7269]" : "text-slate-400"
-          }`}
-        >
-          Select any node on the canvas to configure parameters, prompts, logic rules, or payload data.
-        </p>
-
-        {/* Keyboard Shortcuts Helper */}
-        <div
-          className={`mt-6 pt-4 border-t w-full flex flex-col gap-2 text-[11px] ${
-            isLight ? "border-[#E7E2D8] text-[#7A7269]" : "border-slate-800/60 text-slate-400"
-          }`}
-        >
-          <div
-            className={`flex items-center justify-between px-2 py-1 rounded-lg border ${
-              isLight
-                ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#443E3A]"
-                : "bg-slate-900/40 border-slate-800/50"
-            }`}
-          >
-            <span>Delete node</span>
-            <kbd
-              className={`px-1.5 py-0.5 rounded font-mono text-[10px] border ${
-                isLight
-                  ? "bg-[#EBE6DD] border-[#D8D1C5] text-[#2C2724]"
-                  : "bg-slate-900 border-slate-800 text-slate-300"
-              }`}
-            >
-              Del
-            </kbd>
-          </div>
-          <div
-            className={`flex items-center justify-between px-2 py-1 rounded-lg border ${
-              isLight
-                ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#443E3A]"
-                : "bg-slate-900/40 border-slate-800/50"
-            }`}
-          >
-            <span>Deselect node</span>
-            <kbd
-              className={`px-1.5 py-0.5 rounded font-mono text-[10px] border ${
-                isLight
-                  ? "bg-[#EBE6DD] border-[#D8D1C5] text-[#2C2724]"
-                  : "bg-slate-900 border-slate-800 text-slate-300"
-              }`}
-            >
-              Esc
-            </kbd>
-          </div>
-        </div>
-      </aside>
-    );
+    return null;
   }
 
   const nodeType = (selectedNode.type || selectedNode.data.type || "custom") as NodeType;
@@ -459,6 +385,82 @@ export const NodeInspector: React.FC = () => {
       navigator.clipboard.writeText(url);
       setCopiedWebhook(true);
       setTimeout(() => setCopiedWebhook(false), 1500);
+    };
+
+    
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (file.name.endsWith('.docx')) {
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          let extractedText = "";
+
+          // 1. Direct XML extraction via JSZip (handles Windows-zipped docx with backslashes)
+          try {
+            const JSZip = (await import('jszip')).default || (await import('jszip') as any);
+            const zip = await JSZip.loadAsync(arrayBuffer);
+
+            // Find document.xml regardless of path separators (\ vs /)
+            let docXml: string | null = null;
+            for (const [name, zipEntry] of Object.entries(zip.files)) {
+              if (name.split('\\').join('/').toLowerCase() === 'word/document.xml') {
+                docXml = await (zipEntry as any).async('string');
+                break;
+              }
+            }
+
+            if (docXml) {
+              const paragraphs = docXml.split(/<\/w:p>/);
+              const textLines = paragraphs.map(p => {
+                const matches = p.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) || [];
+                return matches.map(m => m.replace(/<w:t[^>]*>/, '').replace(/<\/w:t>/, '')).join('');
+              }).filter(line => line.trim().length > 0);
+
+              extractedText = textLines.join('\n\n')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&apos;/g, "'");
+            }
+          } catch (zipErr) {
+            console.warn("Direct XML parsing fallback to Mammoth", zipErr);
+          }
+
+          // 2. Fallback to mammoth browser build if XML parse returned empty
+          if (!extractedText.trim()) {
+            const mammothMod: any = await import('mammoth/mammoth.browser.min.js' as any);
+            const mammoth = mammothMod?.extractRawText
+              ? mammothMod
+              : (mammothMod?.default?.extractRawText ? mammothMod.default : (window as any).mammoth);
+            if (mammoth?.extractRawText) {
+              const result = await mammoth.extractRawText({ arrayBuffer });
+              extractedText = result.value || "";
+            }
+          }
+
+          if (!extractedText.trim()) {
+            throw new Error("Could not extract readable text from document.");
+          }
+
+          const newText = (data.inputPrompt ? data.inputPrompt + "\n\n" : "") + "### CANDIDATE MASTER RESUME:\n" + extractedText;
+          handleFieldChange("inputPrompt", newText);
+        } catch (error: any) {
+          console.error("Docx parse error", error);
+          alert(`Could not parse DOCX file: ${error?.message || error}`);
+        }
+      } else {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const text = ev.target?.result;
+          const newText = (data.inputPrompt ? data.inputPrompt + "\n\n" : "") + "### IMPORTED DOCUMENT:\n" + text;
+          handleFieldChange("inputPrompt", newText);
+        };
+        reader.readAsText(file);
+      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     return (
@@ -603,13 +605,34 @@ export const NodeInspector: React.FC = () => {
             <label className={labelClass}>
               Initial Prompt / User Input
             </label>
-            <span
-              className={`text-[10px] font-mono ${
-                isLight ? "text-[#8E8275]" : "text-slate-500"
-              }`}
-            >
-              {(data.inputPrompt || "").length} chars
-            </span>
+            <div className="flex items-center gap-3">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileUpload} 
+                accept=".txt,.md,.json,.docx" 
+                className="hidden" 
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className={`text-[10px] flex items-center gap-1 font-medium transition-colors ${
+                  isLight
+                    ? "text-amber-700 hover:text-amber-800"
+                    : "text-amber-400 hover:text-amber-300"
+                }`}
+              >
+                <Upload className="w-3 h-3" />
+                Upload Text/Docx
+              </button>
+              <span
+                className={`text-[10px] font-mono ${
+                  isLight ? "text-[#8E8275]" : "text-slate-500"
+                }`}
+              >
+                {(data.inputPrompt || "").length} chars
+              </span>
+            </div>
           </div>
           <textarea
             rows={4}
@@ -684,7 +707,20 @@ export const NodeInspector: React.FC = () => {
     const MODEL_OPTIONS: Record<LLMProvider, string[]> = {
       openai: ["gpt-4o", "gpt-4o-mini", "o1", "o1-mini", "o3-mini", "gpt-4-turbo"],
       anthropic: ["claude-3-7-sonnet", "claude-3-5-sonnet", "claude-3-5-haiku", "claude-3-opus"],
-      gemini: ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-2.0-pro-exp"],
+      gemini: [
+        "gemini-2.5-flash",
+        "gemini-2.5-pro",
+        "gemini-2.0-flash",
+        "gemini-2.0-pro-exp-02-05",
+        "gemini-1.5-pro",
+        "gemini-1.5-flash",
+        "gemini-3.7-flash",
+        "gemini-3.8-flash",
+        "gemini-3.8-live",
+        "gemini-3.5-flash-lite",
+        "gemini-3-pro",
+        "gemini-4-argon",
+      ],
       groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "deepseek-r1-distill-llama-70b", "mixtral-8x7b-32768"],
       ollama: ["llama3.3:latest", "deepseek-r1:latest", "mistral:latest", "qwen2.5-coder:latest", "phi3:latest"],
       mock: ["mock-instant-ai", "mock-code-evaluator", "mock-sentiment-analyzer"],
@@ -1549,12 +1585,13 @@ export const NodeInspector: React.FC = () => {
   const renderOutputInspector = () => {
     const data = nodeData as OutputNodeData;
     const format = data.displayFormat || "text";
-    const hasOutput = data.lastOutput !== undefined && data.lastOutput !== null;
+    const executedOutput = liveOutput !== undefined ? liveOutput : data.lastOutput;
+    const hasOutput = executedOutput !== undefined && executedOutput !== null;
 
     const formattedOutputStr = hasOutput
-      ? typeof data.lastOutput === "object"
-        ? JSON.stringify(data.lastOutput, null, 2)
-        : String(data.lastOutput)
+      ? typeof executedOutput === "object"
+        ? JSON.stringify(executedOutput, null, 2)
+        : String(executedOutput)
       : "";
 
     const handleCopyOutput = () => {
@@ -1567,11 +1604,11 @@ export const NodeInspector: React.FC = () => {
     // Helper to render table format if data is structured array
     const renderTableContent = () => {
       let arrayData: any[] = [];
-      if (Array.isArray(data.lastOutput)) {
-        arrayData = data.lastOutput;
-      } else if (typeof data.lastOutput === "string") {
+      if (Array.isArray(executedOutput)) {
+        arrayData = executedOutput;
+      } else if (typeof executedOutput === "string") {
         try {
-          const parsed = JSON.parse(data.lastOutput);
+          const parsed = JSON.parse(executedOutput);
           if (Array.isArray(parsed)) arrayData = parsed;
         } catch {}
       }
@@ -1778,6 +1815,58 @@ export const NodeInspector: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Download File Export Actions */}
+        {hasOutput && (
+          <div className="space-y-2 pt-1 border-t border-dashed border-slate-700/40">
+            <label className={labelClass}>
+              Download Document File
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => downloadText(formattedOutputStr, "tailored_resume.txt")}
+                className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-xs font-medium transition-all hover:scale-105 active:scale-95 ${
+                  isLight
+                    ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#2C2724] hover:bg-[#EBE6DD]"
+                    : "bg-[#060a12]/80 border-slate-800/80 text-slate-300 hover:border-slate-700"
+                }`}
+              >
+                <FileText className="w-4 h-4 mb-1 text-slate-400" />
+                <span className="font-semibold text-[11px]">.TXT</span>
+                <span className={`text-[9px] ${isLight ? "text-[#7A7269]" : "text-slate-500"}`}>Plain Text</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => downloadDocx(formattedOutputStr, "tailored_resume.docx")}
+                className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-xs font-medium transition-all hover:scale-105 active:scale-95 ${
+                  isLight
+                    ? "bg-blue-50 border-blue-200 text-blue-900 hover:bg-blue-100"
+                    : "bg-blue-950/40 border-blue-600/40 text-blue-300 hover:bg-blue-900/40"
+                }`}
+              >
+                <FileDown className="w-4 h-4 mb-1 text-blue-500" />
+                <span className="font-semibold text-[11px]">.DOCX</span>
+                <span className={`text-[9px] ${isLight ? "text-blue-700" : "text-blue-400/80"}`}>MS Word</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => downloadPdf(formattedOutputStr, "tailored_resume.pdf")}
+                className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-xs font-medium transition-all hover:scale-105 active:scale-95 ${
+                  isLight
+                    ? "bg-rose-50 border-rose-200 text-rose-900 hover:bg-rose-100"
+                    : "bg-rose-950/40 border-rose-600/40 text-rose-300 hover:bg-rose-900/40"
+                }`}
+              >
+                <Download className="w-4 h-4 mb-1 text-rose-500" />
+                <span className="font-semibold text-[11px]">.PDF</span>
+                <span className={`text-[9px] ${isLight ? "text-rose-700" : "text-rose-400/80"}`}>A4 Print</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -1898,6 +1987,39 @@ export const NodeInspector: React.FC = () => {
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
+        </div>
+
+        {/* Morph / Convert Node Type Selector */}
+        <div
+          className={`flex items-center justify-between gap-2 pt-1.5 border-t ${
+            isLight ? "border-[#E7E2D8]" : "border-slate-800/50"
+          }`}
+        >
+          <span
+            className={`text-[11px] font-medium flex items-center gap-1.5 ${
+              isLight ? "text-[#7A7269]" : "text-slate-400"
+            }`}
+          >
+            <ArrowRightLeft className="w-3 h-3" />
+            <span>Type</span>
+          </span>
+          <select
+            value={nodeType}
+            onChange={(e) => changeNodeType(selectedNode.id, e.target.value as NodeType)}
+            className={`px-2 py-1 rounded-lg border text-xs font-semibold cursor-pointer outline-none transition-all ${
+              isLight
+                ? "bg-[#F5F2EB] border-[#E7E2D8] text-[#2C2724] hover:bg-[#EBE6DD] focus:border-amber-600/70"
+                : "bg-[#060a12] border-slate-800/80 text-slate-200 hover:bg-slate-900 focus:border-sky-500/60"
+            }`}
+            title="Convert / Change Node Type"
+          >
+            <option value="trigger">Manual Trigger</option>
+            <option value="llm">LLM Agent</option>
+            <option value="condition">Condition (IF/ELSE)</option>
+            <option value="transform">JS Transform</option>
+            <option value="httpRequest">HTTP Request</option>
+            <option value="output">Output Terminal</option>
+          </select>
         </div>
 
         {/* Status Badge */}

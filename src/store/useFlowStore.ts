@@ -6,6 +6,7 @@ import {
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
+  reconnectEdge,
 } from "@xyflow/react";
 import { AppEdge, AppNode, BaseNodeData, NodeExecutionStatus, NodeType, WorkflowExport } from "../types/flow";
 import {
@@ -173,11 +174,14 @@ interface FlowState {
   onNodesChange: (changes: NodeChange<AppNode>[]) => void;
   onEdgesChange: (changes: EdgeChange<AppEdge>[]) => void;
   onConnect: (connection: Connection) => void;
+  reconnectEdge: (oldEdge: AppEdge, newConnection: Connection) => void;
+  deleteEdge: (id: string) => void;
 
   setSelectedNodeId: (id: string | null) => void;
   setWorkflowMeta: (name: string, description?: string) => void;
 
   addNode: (type: NodeType, position?: { x: number; y: number }) => string;
+  changeNodeType: (id: string, newType: NodeType) => void;
   updateNodeData: (id: string, data: Partial<BaseNodeData>) => void;
   deleteNode: (id: string) => void;
   duplicateNode: (id: string) => void;
@@ -194,6 +198,7 @@ interface FlowState {
   loadWorkflow: (workflow: WorkflowExport) => void;
   exportWorkflow: () => WorkflowExport;
   clearCanvas: () => void;
+  createBlankFlow: (name?: string) => void;
 }
 
 const loadSavedWorkflow = (): {
@@ -287,6 +292,20 @@ export const useFlowStore = create<FlowState>((set, get) => {
       persistToStorage();
     },
 
+    reconnectEdge: (oldEdge, newConnection) => {
+      set((state) => ({
+        edges: reconnectEdge(oldEdge, newConnection, state.edges),
+      }));
+      persistToStorage();
+    },
+
+    deleteEdge: (id) => {
+      set((state) => ({
+        edges: state.edges.filter((e) => e.id !== id),
+      }));
+      persistToStorage();
+    },
+
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),
 
     setWorkflowMeta: (name, description) => {
@@ -317,6 +336,26 @@ export const useFlowStore = create<FlowState>((set, get) => {
       }));
       persistToStorage();
       return id;
+    },
+
+    changeNodeType: (id, newType) => {
+      set((state) => ({
+        nodes: state.nodes.map((node) => {
+          if (node.id === id) {
+            const defaultData = createDefaultNodeData(newType);
+            return {
+              ...node,
+              type: newType,
+              data: {
+                ...defaultData,
+                status: node.data.status,
+              },
+            };
+          }
+          return node;
+        }),
+      }));
+      persistToStorage();
     },
 
     updateNodeData: (id, partialData) => {
@@ -443,6 +482,25 @@ export const useFlowStore = create<FlowState>((set, get) => {
         nodes: [],
         edges: [],
         selectedNodeId: null,
+      });
+      persistToStorage();
+    },
+
+    createBlankFlow: (name = "Untitled Flow") => {
+      const triggerId = "node_trigger_1";
+      const initialNode: AppNode = {
+        id: triggerId,
+        type: "trigger",
+        position: { x: 120, y: 220 },
+        data: createDefaultNodeData("trigger"),
+      };
+      set({
+        workflowId: `wf_${Date.now()}`,
+        workflowName: name,
+        workflowDescription: "Custom AI DAG Workflow created from scratch",
+        nodes: [initialNode],
+        edges: [],
+        selectedNodeId: triggerId,
       });
       persistToStorage();
     },

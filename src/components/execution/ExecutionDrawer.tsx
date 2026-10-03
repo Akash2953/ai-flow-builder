@@ -8,6 +8,7 @@ import React, { useState, useMemo } from "react";
 import {
   ChevronUp,
   ChevronDown,
+  X,
   Trash2,
   CheckCircle2,
   AlertCircle,
@@ -216,6 +217,11 @@ export const ExecutionDrawer: React.FC = () => {
 
   const activeStepTypeStyle = activeStep ? getNodeTypeStyle(activeStep.nodeType, isLight) : null;
 
+  // If drawer is closed, do not render or occupy canvas bottom space
+  if (!isDrawerOpen) {
+    return null;
+  }
+
   return (
     <div
       className={`absolute bottom-0 left-0 right-0 z-30 backdrop-blur-xl flex flex-col transition-all duration-300 ease-in-out ${
@@ -223,11 +229,7 @@ export const ExecutionDrawer: React.FC = () => {
           ? "bg-[#FAF8F5]/95 border-t border-[#E7E2D8] shadow-[0_-8px_32px_rgba(180,165,145,0.2)] text-[#2C2724]"
           : "bg-[#080d18]/95 border-t border-slate-800/80 shadow-[0_-10px_40px_rgba(0,0,0,0.6)] text-slate-100"
       } ${
-        isDrawerOpen
-          ? isExpanded
-            ? "h-[68vh]"
-            : "h-80"
-          : "h-11"
+        isExpanded ? "h-[68vh]" : "h-80"
       }`}
     >
       {/* Top Ambient Highlight Rim */}
@@ -396,43 +398,42 @@ export const ExecutionDrawer: React.FC = () => {
             </button>
           )}
 
-          {isDrawerOpen && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}
-              title={isExpanded ? "Collapse height" : "Maximize height"}
-              className={`p-1.5 rounded-lg border border-transparent transition-all ${
-                isLight
-                  ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-[#EBE6DD] hover:border-[#D8D1C5]"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 hover:border-slate-700/60"
-              }`}
-            >
-              {isExpanded ? (
-                <Minimize2 className="w-3.5 h-3.5" />
-              ) : (
-                <Maximize2 className="w-3.5 h-3.5" />
-              )}
-            </button>
-          )}
-
           <button
             type="button"
-            onClick={() => setDrawerOpen(!isDrawerOpen)}
-            title={isDrawerOpen ? "Collapse drawer" : "Open telemetry drawer"}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+            title={isExpanded ? "Collapse height" : "Maximize height"}
             className={`p-1.5 rounded-lg border border-transparent transition-all ${
               isLight
                 ? "text-[#7A7269] hover:text-[#2C2724] hover:bg-[#EBE6DD] hover:border-[#D8D1C5]"
                 : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 hover:border-slate-700/60"
             }`}
           >
-            {isDrawerOpen ? (
-              <ChevronDown className="w-4 h-4" />
+            {isExpanded ? (
+              <Minimize2 className="w-3.5 h-3.5" />
             ) : (
-              <ChevronUp className="w-4 h-4" />
+              <Maximize2 className="w-3.5 h-3.5" />
             )}
+          </button>
+
+          {/* Close Telemetry Drawer Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDrawerOpen(false);
+            }}
+            title="Close Drawer"
+            aria-label="Close Drawer"
+            className={`p-1.5 rounded-lg border border-transparent transition-all ${
+              isLight
+                ? "text-[#7A7269] hover:text-rose-700 hover:bg-rose-50 hover:border-rose-200"
+                : "text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/20"
+            }`}
+          >
+            <X className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -440,8 +441,7 @@ export const ExecutionDrawer: React.FC = () => {
       {/* -------------------------------------------------------------
           Drawer Body (Timeline Sidebar + Step Detail Pane)
           ------------------------------------------------------------- */}
-      {isDrawerOpen && (
-        <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden">
           {/* Step Sequence Timeline (Left) */}
           <div
             className={`w-72 md:w-80 border-r flex flex-col overflow-hidden select-none flex-shrink-0 transition-colors ${
@@ -986,7 +986,6 @@ export const ExecutionDrawer: React.FC = () => {
             )}
           </div>
         </div>
-      )}
     </div>
   );
 };
