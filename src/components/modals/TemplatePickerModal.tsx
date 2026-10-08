@@ -4,7 +4,7 @@
 // Data Schema: WorkflowTemplate from src/templates/workflowTemplates.ts
 // Redesign: Taste-Skill premium developer tool aesthetics with Dual-Theme Tactile Soft-Clay Neumorphic Light & Linear Dark styling
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   X,
   Sparkles,
@@ -39,6 +39,74 @@ interface TemplatePickerModalProps {
   onClose: () => void;
   initialMode?: "browse" | "save";
 }
+
+interface TiltCardProps {
+  children: React.ReactNode;
+  className?: string;
+  isLight: boolean;
+}
+
+const TiltCard: React.FC<TiltCardProps> = ({ children, className = "", isLight }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!window.matchMedia('(hover: hover)').matches) return;
+    if (!cardRef.current || !glowRef.current) return;
+
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Normalize to -1 -> 1 range and multiply by 6 degrees max tilt
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = -((y - centerY) / centerY) * 6;
+    const rotateY = ((x - centerX) / centerX) * 6;
+
+    cardRef.current.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+    // Convert to percentage for the background gradient
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+
+    const glowColor = isLight ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)";
+    glowRef.current.style.background = `radial-gradient(circle at ${xPercent}% ${yPercent}%, ${glowColor} 0%, transparent 50%)`;
+    glowRef.current.style.opacity = "1";
+  }, [isLight]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!cardRef.current || !glowRef.current) return;
+    // Fast reset transition
+    cardRef.current.style.transition = 'transform 0.15s ease-out';
+    cardRef.current.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)';
+    glowRef.current.style.opacity = "0";
+
+    // Remove transition after it completes to make the next hover instantly responsive
+    setTimeout(() => {
+      if (cardRef.current) {
+        cardRef.current.style.transition = '';
+      }
+    }, 150);
+  }, []);
+
+  return (
+    <div
+      ref={cardRef}
+      className={`relative transform-style-preserve-3d ${className}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ transformStyle: 'preserve-3d' }}
+    >
+      <div
+        ref={glowRef}
+        className="absolute inset-0 z-10 pointer-events-none rounded-xl opacity-0 transition-opacity duration-300"
+      />
+      {children}
+    </div>
+  );
+};
 
 export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
   isOpen,
@@ -589,8 +657,9 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
               {filteredTemplates.map((template) => (
-                <div
+                <TiltCard
                   key={template.id}
+                  isLight={isLight}
                   className={`p-3.5 sm:p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between group relative ${
                     isLight
                       ? "bg-[#FAF8F5] border-[#E7E2D8] hover:border-amber-500/50 hover:bg-[#F5F2EB] shadow-[0_2px_8px_rgba(180,165,145,0.12)] hover:shadow-[0_4px_16px_rgba(180,165,145,0.2)]"
@@ -704,7 +773,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleSelectTemplate(template)}
-                      className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 min-h-[36px] touch-manipulation ${
+                      className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 min-h-[36px] touch-manipulation relative z-20 ${
                         isLight
                           ? "bg-[#2C2724] hover:bg-[#443E3A] text-[#FAF8F5] shadow-sm hover:shadow"
                           : "bg-sky-500/10 hover:bg-sky-500 border border-sky-500/30 text-sky-300 hover:text-slate-950 group-hover:shadow-md group-hover:shadow-sky-500/20"
@@ -714,7 +783,7 @@ export const TemplatePickerModal: React.FC<TemplatePickerModalProps> = ({
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                </div>
+                </TiltCard>
               ))}
             </div>
           )}

@@ -453,6 +453,57 @@ export const FlowCanvas: React.FC = () => {
   const duplicateNode = useFlowStore((state) => state.duplicateNode);
   const selectedNodeId = useFlowStore((state) => state.selectedNodeId);
 
+  // Dynamically compute edge execution tracking styles
+  const processedEdges = useMemo(() => {
+    return edges.map((edge) => {
+      const status = edge.data?.status || "idle";
+
+      let strokeColor = isLight ? "#C8BEB2" : "#334155";
+      let strokeWidth = 2;
+      let isAnimated = edge.animated ?? true;
+      let filter = isLight
+        ? "drop-shadow(0 1px 2px rgba(180,165,145,0.12))"
+        : "drop-shadow(0 1px 2px rgba(0,0,0,0.15))";
+      let strokeDasharray: string | undefined = undefined;
+
+      if (status === "running") {
+        strokeColor = isLight ? "#D97706" : "#06b6d4";
+        strokeWidth = 3.5;
+        isAnimated = true;
+        filter = isLight
+          ? "drop-shadow(0 0 10px rgba(217, 119, 6, 0.8))"
+          : "drop-shadow(0 0 14px rgba(6, 182, 212, 0.9))";
+      } else if (status === "success") {
+        strokeColor = "#10b981";
+        strokeWidth = 2.5;
+        isAnimated = false;
+        filter = "drop-shadow(0 0 8px rgba(16, 185, 129, 0.6))";
+      } else if (status === "error") {
+        strokeColor = "#f43f5e";
+        strokeWidth = 2.5;
+        isAnimated = false;
+        filter = "drop-shadow(0 0 8px rgba(244, 63, 94, 0.6))";
+      } else if (status === "skipped") {
+        strokeColor = isLight ? "#A8A29E" : "#475569";
+        strokeWidth = 1.5;
+        isAnimated = false;
+        strokeDasharray = "4 4";
+      }
+
+      return {
+        ...edge,
+        animated: isAnimated,
+        style: {
+          ...edge.style,
+          stroke: strokeColor,
+          strokeWidth,
+          filter,
+          strokeDasharray,
+        },
+      };
+    });
+  }, [edges, isLight]);
+
   // Context Menu State
   const [contextMenu, setContextMenu] = useState<{
     type: "pane" | "node";
@@ -741,7 +792,7 @@ export const FlowCanvas: React.FC = () => {
     >
       <ReactFlow
         nodes={nodes}
-        edges={edges}
+        edges={processedEdges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}

@@ -8,7 +8,7 @@ import {
   applyNodeChanges,
   reconnectEdge,
 } from "@xyflow/react";
-import { AppEdge, AppNode, BaseNodeData, NodeExecutionStatus, NodeType, WorkflowExport } from "../types/flow";
+import { AppEdge, AppNode, BaseNodeData, EdgeExecutionStatus, NodeExecutionStatus, NodeType, WorkflowExport } from "../types/flow";
 import {
   ConditionNodeData,
   HttpRequestNodeData,
@@ -193,6 +193,8 @@ interface FlowState {
     outputSummary?: string,
     executionTimeMs?: number
   ) => void;
+  updateEdgeStatus: (id: string, status: EdgeExecutionStatus) => void;
+  updateEdgeStatusesByNode: (targetNodeId: string, status: EdgeExecutionStatus, sourceNodeId?: string) => void;
   resetAllNodeStatuses: () => void;
 
   loadWorkflow: (workflow: WorkflowExport) => void;
@@ -431,6 +433,42 @@ export const useFlowStore = create<FlowState>((set, get) => {
       }));
     },
 
+    updateEdgeStatus: (id, status) => {
+      set((state) => ({
+        edges: state.edges.map((edge) => {
+          if (edge.id === id) {
+            return {
+              ...edge,
+              data: {
+                ...edge.data,
+                status,
+              },
+            };
+          }
+          return edge;
+        }),
+      }));
+    },
+
+    updateEdgeStatusesByNode: (targetNodeId, status, sourceNodeId) => {
+      set((state) => ({
+        edges: state.edges.map((edge) => {
+          const isTargetMatch = edge.target === targetNodeId;
+          const isSourceMatch = !sourceNodeId || edge.source === sourceNodeId;
+          if (isTargetMatch && isSourceMatch) {
+            return {
+              ...edge,
+              data: {
+                ...edge.data,
+                status,
+              },
+            };
+          }
+          return edge;
+        }),
+      }));
+    },
+
     resetAllNodeStatuses: () => {
       set((state) => ({
         nodes: state.nodes.map((node) => ({
@@ -441,6 +479,13 @@ export const useFlowStore = create<FlowState>((set, get) => {
             errorMessage: undefined,
             outputSummary: undefined,
             executionTimeMs: undefined,
+          },
+        })),
+        edges: state.edges.map((edge) => ({
+          ...edge,
+          data: {
+            ...edge.data,
+            status: "idle",
           },
         })),
       }));

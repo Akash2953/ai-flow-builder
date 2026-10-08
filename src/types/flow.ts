@@ -9,6 +9,7 @@ export type NodeType =
   | "output";
 
 export type NodeExecutionStatus = "idle" | "running" | "success" | "error" | "skipped";
+export type EdgeExecutionStatus = "idle" | "running" | "success" | "error" | "skipped";
 
 export interface BaseNodeData {
   label: string;

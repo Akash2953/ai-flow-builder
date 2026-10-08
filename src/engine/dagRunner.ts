@@ -446,6 +446,7 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
       // Check if node is skipped by upstream condition branch
       if (skippedNodes.has(node.id)) {
         flowStore.updateNodeStatus(node.id, "idle", undefined, "Skipped by condition branch");
+        flowStore.updateEdgeStatusesByNode(node.id, "skipped");
         currentExecStore.updateStep(step.id, { status: "idle", logs: ["[Info] Node skipped by upstream branch"] });
         continue;
       }
@@ -474,13 +475,15 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
         downstreamEdges.forEach((e) => skippedNodes.add(e.target));
 
         flowStore.updateNodeStatus(node.id, "idle", undefined, "Branch not taken");
+        flowStore.updateEdgeStatusesByNode(node.id, "skipped");
         currentExecStore.updateStep(step.id, { status: "idle", logs: ["[Info] Branch not active"] });
         continue;
       }
 
-      // Set node to running
+      // Set node to running and light up incoming edge in progress
       const prevOutput = previousNodeId ? currentExecStore.nodeOutputs[previousNodeId]?.output : undefined;
       flowStore.updateNodeStatus(node.id, "running");
+      flowStore.updateEdgeStatusesByNode(node.id, "running");
       currentExecStore.setActiveNodeId(node.id);
       currentExecStore.updateStep(step.id, {
         status: "running",
@@ -512,6 +515,7 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
           result.summary,
           durationMs
         );
+        flowStore.updateEdgeStatusesByNode(node.id, "success");
 
         // Persist output to node data so it survives page reloads
         flowStore.updateNodeData(node.id, { lastOutput: result.output });
@@ -522,6 +526,7 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
           outgoingEdges.forEach((edge) => {
             if (edge.sourceHandle && edge.sourceHandle !== result.conditionBranch) {
               skippedNodes.add(edge.target);
+              flowStore.updateEdgeStatus(edge.id, "skipped");
             }
           });
         }
@@ -532,6 +537,7 @@ export async function executeWorkflow(targetNodeId?: string): Promise<{ success:
         useExecutionStore.getState().addLog(step.id, `[ERROR] ${errMsg}`);
         useExecutionStore.getState().recordStepOutput(node.id, null, "error", durationMs, errMsg);
         flowStore.updateNodeStatus(node.id, "error", errMsg, "Failed", durationMs);
+        flowStore.updateEdgeStatusesByNode(node.id, "error");
 
         useExecutionStore.getState().finishRun("error", errMsg);
         return { success: false, error: errMsg };

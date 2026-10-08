@@ -123,36 +123,43 @@ export const BaseNodeWrapper: React.FC<BaseNodeWrapperProps> = ({
 
   return (
     <div
-      className={`group relative min-w-[280px] max-w-[340px] rounded-xl border transition-all duration-200 select-none ${
+      className={`group relative min-w-[280px] max-w-[340px] rounded-xl border transition-all duration-300 ease-out select-none ${
         isLight
-          ? `bg-[#FAF8F5] text-[#443E3A] shadow-[0_4px_20px_-2px_rgba(180,165,145,0.22),0_0_0_1px_rgba(231,226,216,0.8),inset_0_1px_0_rgba(255,255,255,0.95)] ${
+          ? `bg-[#FAF8F5] text-[#443E3A] shadow-[0_1px_3px_rgba(180,165,145,0.15),0_6px_24px_-4px_rgba(180,165,145,0.2),0_0_0_1px_rgba(231,226,216,0.7),inset_0_1px_0_rgba(255,255,255,0.9)] ${
               selected
-                ? "border-amber-600/80 ring-2 ring-amber-500/25 shadow-[0_8px_28px_-4px_rgba(217,119,6,0.25)] -translate-y-0.5"
+                ? "border-amber-600/80 ring-2 ring-amber-500/25 shadow-[0_4px_8px_rgba(180,165,145,0.25),0_20px_48px_-8px_rgba(217,119,6,0.3),0_0_0_1px_rgba(231,226,216,0.8),inset_0_1px_0_rgba(255,255,255,0.95)] -translate-y-1"
                 : status === "running"
-                ? "border-amber-500/80 ring-2 ring-amber-500/25 shadow-[0_8px_24px_rgba(217,119,6,0.2)]"
+                ? "border-amber-500 ring-4 ring-amber-500/40 shadow-[0_8px_20px_rgba(180,165,145,0.25),0_24px_50px_-4px_rgba(217,119,6,0.4),0_0_0_1px_rgba(231,226,216,0.9),inset_0_1px_0_rgba(255,255,255,0.95)] animate-pulse -translate-y-2.5 scale-[1.02] z-30"
                 : status === "success"
-                ? "border-emerald-500/60 ring-1 ring-emerald-500/20 shadow-[0_4px_20px_rgba(16,185,129,0.15)]"
+                ? "border-emerald-500/70 ring-1 ring-emerald-500/25 shadow-[0_2px_6px_rgba(16,185,129,0.12),0_8px_24px_-4px_rgba(16,185,129,0.18),0_0_0_1px_rgba(231,226,216,0.7),inset_0_1px_0_rgba(255,255,255,0.9)] translate-y-0 scale-100"
                 : status === "skipped"
-                ? "border-stone-300/80 opacity-75"
+                ? "border-stone-300/80 opacity-75 translate-y-0 scale-100"
                 : status === "error"
-                ? "border-rose-500/60 ring-1 ring-rose-500/20 shadow-[0_4px_20px_rgba(244,63,94,0.15)]"
-                : "border-[#E7E2D8] hover:border-[#D9D1C5] hover:shadow-[0_8px_28px_-4px_rgba(180,165,145,0.3)]"
+                ? "border-rose-500/60 ring-1 ring-rose-500/20 shadow-[0_2px_6px_rgba(244,63,94,0.12),0_8px_28px_-4px_rgba(244,63,94,0.18),0_0_0_1px_rgba(231,226,216,0.7),inset_0_1px_0_rgba(255,255,255,0.9)] translate-y-0 scale-100"
+                : "border-[#E7E2D8] hover:border-[#D9D1C5] hover:-translate-y-1 hover:shadow-[0_2px_6px_rgba(180,165,145,0.2),0_16px_40px_-6px_rgba(180,165,145,0.28),0_0_0_1px_rgba(231,226,216,0.8),inset_0_1px_0_rgba(255,255,255,0.95)] translate-y-0 scale-100"
             }`
-          : `bg-[#0c1220]/95 backdrop-blur-md text-slate-300 shadow-xl ${
+          : `bg-[#0c1220]/95 backdrop-blur-md text-slate-300 shadow-[0_1px_2px_rgba(0,0,0,0.3),0_4px_16px_-2px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.06)] ${
               selected
-                ? "border-sky-500/90 ring-1 ring-sky-400/50 shadow-[0_0_24px_rgba(56,189,248,0.22)] -translate-y-0.5"
+                ? "border-sky-500/90 ring-1 ring-sky-400/50 shadow-[0_4px_8px_rgba(0,0,0,0.5),0_20px_48px_-8px_rgba(56,189,248,0.3),0_0_0_1px_rgba(255,255,255,0.1)] -translate-y-1"
                 : status === "running"
-                ? "border-sky-500/80 ring-1 ring-sky-500/30 shadow-[0_0_20px_rgba(56,189,248,0.2)]"
+                ? "border-sky-400 ring-4 ring-sky-500/40 shadow-[0_8px_24px_rgba(0,0,0,0.6),0_24px_50px_-4px_rgba(56,189,248,0.45),0_0_0_1px_rgba(255,255,255,0.12)] animate-pulse -translate-y-2.5 scale-[1.02] z-30"
                 : status === "success"
-                ? "border-emerald-500/60 ring-1 ring-emerald-500/20 shadow-[0_0_16px_rgba(16,185,129,0.15)]"
+                ? "border-emerald-500/70 ring-1 ring-emerald-500/25 shadow-[0_2px_4px_rgba(0,0,0,0.4),0_8px_28px_-4px_rgba(16,185,129,0.2),0_0_0_1px_rgba(255,255,255,0.06)] translate-y-0 scale-100"
                 : status === "skipped"
-                ? "border-slate-800/60 opacity-60"
+                ? "border-slate-800/60 opacity-60 translate-y-0 scale-100"
                 : status === "error"
-                ? "border-rose-500/60 ring-1 ring-rose-500/20 shadow-[0_0_16px_rgba(244,63,94,0.15)]"
-                : "border-slate-800/80 hover:border-slate-700/90 hover:shadow-2xl hover:shadow-black/50"
+                ? "border-rose-500/60 ring-1 ring-rose-500/20 shadow-[0_2px_4px_rgba(0,0,0,0.4),0_8px_28px_-4px_rgba(244,63,94,0.2),0_0_0_1px_rgba(255,255,255,0.06)] translate-y-0 scale-100"
+                : "border-slate-800/80 hover:border-slate-700/90 hover:-translate-y-1 hover:shadow-[0_2px_4px_rgba(0,0,0,0.4),0_12px_32px_-4px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.08)] translate-y-0 scale-100"
             }`
       }`}
     >
+      {/* Card Ground Shadow */}
+      <div
+        className={`absolute -bottom-1 inset-x-2 h-2 rounded-full blur-md pointer-events-none ${
+          isLight ? "bg-black/10" : "bg-black/30"
+        }`}
+      />
+
       {/* Top Ambient Highlight Rim */}
       <div
         className={`absolute inset-x-0 top-0 h-[1px] rounded-t-xl pointer-events-none ${

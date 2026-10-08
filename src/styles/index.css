@@ -163,6 +163,7 @@ html.light .react-flow__background,
 .react-flow__node {
   cursor: grab;
   touch-action: none;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.2s ease;
 }
 
 .react-flow__node:active {
@@ -188,7 +189,7 @@ html.light .react-flow__selection,
   border-radius: 50% !important;
   border: 2px solid #090D16 !important;
   background-color: #38bdf8 !important;
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35), 0 2px 4px rgba(0,0,0,0.3) !important;
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease, box-shadow 0.15s ease !important;
   z-index: 10 !important;
   touch-action: none !important;
@@ -211,7 +212,7 @@ html.light .react-flow__handle,
 [data-theme="light"] .react-flow__handle {
   border: 2px solid #FAF8F5 !important;
   background-color: #d97706 !important;
-  box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.35) !important;
+  box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.35), 0 2px 4px rgba(180,165,145,0.25) !important;
 }
 
 .react-flow__handle:hover {
@@ -245,10 +246,12 @@ html.light .react-flow__handle:hover,
   stroke: #273553 !important;
   stroke-width: 2 !important;
   transition: stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
 }
 html.light .react-flow__edge-path,
 [data-theme="light"] .react-flow__edge-path {
   stroke: #D4CEB8 !important;
+  filter: drop-shadow(0 1px 2px rgba(180,165,145,0.12));
 }
 
 .react-flow__edge:hover .react-flow__edge-path {
@@ -363,6 +366,43 @@ html.light .react-flow__controls-button:hover,
   background: #EFE8DA !important;
   color: #2C2724 !important;
   fill: #2C2724 !important;
+}
+
+/* -------------------------------------------------------------
+   3D Canvas Depth Enhancements
+   ------------------------------------------------------------- */
+
+/* Canvas vignette radial shadow */
+.react-flow__viewport::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(9,13,22,0.15) 100%);
+}
+html.light .react-flow__viewport::before,
+[data-theme="light"] .react-flow__viewport::before {
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(180,165,145,0.08) 100%);
+}
+
+/* Bottom shadow for card-on-surface contact shadow illusion */
+.react-flow__node::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 8px;
+  right: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.18) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+html.light .react-flow__node::after,
+[data-theme="light"] .react-flow__node::after {
+  background: radial-gradient(ellipse at center, rgba(180,165,145,0.15) 0%, transparent 70%);
 }
 
 /* -------------------------------------------------------------
